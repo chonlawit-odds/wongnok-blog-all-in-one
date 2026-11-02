@@ -47,6 +47,7 @@
 8. strong parameters ไม่ใช่ authorization — แยกให้ออก
 9. partial รับค่าผ่าน local เท่านั้น ห้ามอ้าง instance variable ข้างใน
 10. ห้ามใช้ raw หรือ html_safe กับข้อมูลที่มาจากผู้ใช้ ตัดข้อความด้วย truncate ไม่ใช่ substring (substring ตัดสระไทยขาด)
+11. ชื่อคลาส Tailwind ต้องเขียนเต็มเป็นข้อความ ห้ามต่อจากตัวแปร และใช้ semantic color ของ daisyUI (primary, base-100) ไม่ใช่ bg-blue-600
 
 ## รูปแบบการตอบ
 
