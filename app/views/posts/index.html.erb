@@ -5,8 +5,8 @@
     <div role="status" id="notice" class="alert alert-success mb-6"><%= notice %></div>
   <% end %>
 
-  <div class="flex items-center justify-between mb-8">
-    <h1 class="text-4xl font-bold"><%= t(".title") %></h1>
+  <div class="flex flex-wrap items-center justify-between gap-4 mb-8">
+    <h1 class="text-3xl sm:text-4xl font-bold"><%= t(".title") %></h1>
     <%= link_to t(".new_post"), new_post_path, class: "btn btn-primary" %>
   </div>
 

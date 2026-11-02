@@ -27,6 +27,14 @@
 - theme ที่สร้างเอง ต้องมีทั้ง light และ dark
 - เช็ก: `grep -rnE "(bg|text|border)-(gray|red|blue|green|white|black)" app/views` ต้องไม่เจอ
 
+## การสลับธีม  (light/dark)
+
+- theme ของ daisyUI: `light` (default) / `dark` (ตามเครื่อง)
+- ตั้ง `data-theme` บน `<html>` เท่านั้น ห้ามใส่บน div ย่อยหรือเขียนตายตัวใน layout
+- logic: `controllers/theme_controller.js` จำค่าใน localStorage key `theme`
+- ปุ่ม: `shared/_navbar.html.erb` ห้ามใช้ class `theme-controller` ของ daisyUI
+- refresh แล้วสีกะพริบ: แก้ด้วย cookie + server ใส่ data-theme ไม่ใช่ `<script>` ใน view
+
 ## กฎที่ห้ามลืม  (จากวันก่อน)
 
 1. validates uniqueness ต้องมี unique index ที่ DB คู่เสมอ

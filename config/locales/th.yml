@@ -1,4 +1,41 @@
 th:
+  activerecord:
+    models:
+      category: หมวดหมู่
+    attributes:
+      category:
+        name: ชื่อหมวดหมู่
+        slug: ชื่อใน URL (slug)
+  categories:
+    index:
+      title: หมวดหมู่
+      new_category: เพิ่มหมวดหมู่
+      show: ดู
+      edit: แก้ไข
+      destroy: ลบ
+      confirm_destroy: ยืนยันที่จะลบหมวดหมู่นี้?
+      empty: ยังไม่มีหมวดหมู่
+    show:
+      title: รายละเอียดหมวดหมู่
+      edit: แก้ไขหมวดหมู่
+      back: กลับไปหน้ารายการ
+      destroy: ลบหมวดหมู่
+      confirm_destroy: ยืนยันที่จะลบหมวดหมู่นี้?
+    new:
+      title: เพิ่มหมวดหมู่ใหม่
+      back: กลับไปหน้ารายการ
+    edit:
+      title: แก้ไขหมวดหมู่
+      show: ดูหมวดหมู่นี้
+      back: กลับไปหน้ารายการ
+    form:
+      error_header: "บันทึกไม่ได้ มีข้อผิดพลาด %{count} รายการ:"
+    create:
+      success: สร้างหมวดหมู่เรียบร้อยแล้ว
+    update:
+      success: แก้ไขหมวดหมู่เรียบร้อยแล้ว
+    destroy:
+      success: ลบหมวดหมู่เรียบร้อยแล้ว
   posts:
     index:
       title: บทความ
@@ -14,6 +51,14 @@ th:
     post:
       posted_ago: "%{time}ที่แล้ว"
   shared:
+    navbar:
+      brand: Wongnok Blog
+      main_menu: เมนูหลัก
+      open_menu: เปิดเมนู
+      posts: บทความ
+      categories: หมวดหมู่
+      new_post: เขียนบทความ
+      toggle_theme: สลับธีมสว่าง/มืด
     pagination:
       label: เปลี่ยนหน้า
       previous: "« ก่อนหน้า"
