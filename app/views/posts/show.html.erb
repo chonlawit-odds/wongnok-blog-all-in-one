@@ -1,15 +1,23 @@
-<% content_for :title, "Showing post" %>
+<% content_for :title, @post.title %>
 
-<div class="md:w-2/3 w-full">
+<div class="w-full max-w-3xl mx-auto">
   <% if notice.present? %>
-    <p class="py-2 px-3 bg-green-50 mb-5 text-green-500 font-medium rounded-md inline-block" id="notice"><%= notice %></p>
+    <div role="status" id="notice" class="alert alert-success mb-6"><%= notice %></div>
   <% end %>
 
-  <h1 class="font-bold text-4xl">Showing post</h1>
+  <nav class="breadcrumbs text-sm mb-4" aria-label="<%= t(".breadcrumb") %>">
+    <ul>
+      <li><%= link_to t(".breadcrumb_root"), posts_path %></li>
+      <li aria-current="page"><%= truncate(@post.title, length: 40) %></li>
+    </ul>
+  </nav>
 
-  <%= render @post %>
+  <%= render @post, full: true %>
 
-  <%= link_to "Edit this post", edit_post_path(@post), class: "w-full sm:w-auto text-center rounded-md px-3.5 py-2.5 bg-gray-100 hover:bg-gray-50 inline-block font-medium" %>
-  <%= link_to "Back to posts", posts_path, class: "w-full sm:w-auto text-center mt-2 sm:mt-0 sm:ml-2 rounded-md px-3.5 py-2.5 bg-gray-100 hover:bg-gray-50 inline-block font-medium" %>
-  <%= button_to "Destroy this post", @post, method: :delete, form_class: "sm:inline-block mt-2 sm:mt-0 sm:ml-2", class: "w-full rounded-md px-3.5 py-2.5 text-white bg-red-600 hover:bg-red-500 font-medium cursor-pointer", data: { turbo_confirm: "Are you sure?" } %>
+  <div class="flex flex-wrap gap-2 mt-6">
+    <%= link_to t(".back"), posts_path, class: "btn btn-ghost" %>
+    <%= link_to t(".edit"), edit_post_path(@post), class: "btn" %>
+    <%= button_to t(".destroy"), @post, method: :delete, class: "btn btn-error",
+          data: { turbo_confirm: t(".confirm_destroy") } %>
+  </div>
 </div>

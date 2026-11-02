@@ -17,6 +17,16 @@
 - ตั้งชื่อตาม convention ของ Rails เสมอ
 - ห้ามมี `<script>` ใน view
 
+## สีและ theme  (ต้องดูออกทั้ง light/dark)
+
+- ห้ามสีตายตัว (bg-gray-100, text-white, border-red-400) และห้าม dark:
+  ใช้สี daisyUI: base-100/200/300, base-content, primary, error ฯลฯ
+- ใช้ component daisyUI ก่อน: btn, input, textarea, alert, card, badge
+- ตั้งสีพื้นต้องตั้งสีตัวหนังสือคู่ เช่น bg-primary + text-primary-content
+- ตัวหนังสือจาง: text-base-content/60
+- theme ที่สร้างเอง ต้องมีทั้ง light และ dark
+- เช็ก: `grep -rnE "(bg|text|border)-(gray|red|blue|green|white|black)" app/views` ต้องไม่เจอ
+
 ## กฎที่ห้ามลืม  (จากวันก่อน)
 
 1. validates uniqueness ต้องมี unique index ที่ DB คู่เสมอ

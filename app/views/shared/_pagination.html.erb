@@ -1,0 +1,20 @@
+<%# locals: (pagy:) -%>
+<% if pagy.last > 1 %>
+  <nav class="flex justify-center mt-8" aria-label="<%= t(".label") %>">
+    <div class="join">
+      <% if pagy.previous %>
+        <%= link_to t(".previous"), pagy.page_url(:previous), class: "join-item btn", rel: "prev" %>
+      <% else %>
+        <span class="join-item btn btn-disabled" aria-disabled="true"><%= t(".previous") %></span>
+      <% end %>
+
+      <span class="join-item btn pointer-events-none"><%= t(".current", page: pagy.page, last: pagy.last) %></span>
+
+      <% if pagy.next %>
+        <%= link_to t(".next"), pagy.page_url(:next), class: "join-item btn", rel: "next" %>
+      <% else %>
+        <span class="join-item btn btn-disabled" aria-disabled="true"><%= t(".next") %></span>
+      <% end %>
+    </div>
+  </nav>
+<% end %>

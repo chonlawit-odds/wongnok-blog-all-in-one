@@ -71,3 +71,7 @@ gem "strong_migrations", "~> 2.8"
 
 gem "bullet", "~> 8.3", group: :development
 gem "rack-mini-profiler", "~> 5.0", group: :development
+
+gem "pagy", "~> 43.5"
+
+gem "rails-i18n", "~> 8.1"

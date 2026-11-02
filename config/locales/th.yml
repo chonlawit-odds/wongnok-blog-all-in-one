@@ -1,0 +1,21 @@
+th:
+  posts:
+    index:
+      title: บทความ
+      new_post: เขียนบทความใหม่
+      empty: ยังไม่มีบทความ
+    show:
+      breadcrumb: เส้นทางนำทาง
+      breadcrumb_root: บทความทั้งหมด
+      back: กลับไปหน้ารายการ
+      edit: แก้ไข
+      destroy: ลบบทความ
+      confirm_destroy: ยืนยันที่จะลบบทความนี้?
+    post:
+      posted_ago: "%{time}ที่แล้ว"
+  shared:
+    pagination:
+      label: เปลี่ยนหน้า
+      previous: "« ก่อนหน้า"
+      next: "ถัดไป »"
+      current: หน้า %{page} จาก %{last}
