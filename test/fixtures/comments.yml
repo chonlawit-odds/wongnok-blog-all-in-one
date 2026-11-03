@@ -1,0 +1,11 @@
+one:
+  post: one
+  author_name: สมชาย
+  body: บทความดีมากครับ
+  created_at: <%= 2.hours.ago %>
+
+two:
+  post: one
+  author_name: สมหญิง
+  body: ขอบคุณที่แบ่งปันค่ะ
+  created_at: <%= 1.hour.ago %>

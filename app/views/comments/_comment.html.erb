@@ -1,0 +1,11 @@
+<%# locals: (comment:) -%>
+<article id="<%= dom_id comment %>" class="rounded-box bg-base-100 text-base-content border border-base-300 p-4">
+  <div class="flex flex-wrap items-baseline gap-2 text-sm">
+    <span class="font-semibold"><%= comment.author_name %></span>
+    <%= time_tag comment.created_at,
+          t(".posted_ago", time: time_ago_in_words(comment.created_at)),
+          title: l(comment.created_at, format: :long),
+          class: "text-base-content/60" %>
+  </div>
+  <p class="mt-2 whitespace-pre-line break-words leading-relaxed"><%= comment.body %></p>
+</article>

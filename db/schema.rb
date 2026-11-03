@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_02_035134) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_03_175653) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -20,6 +20,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_02_035134) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["slug"], name: "index_categories_on_slug", unique: true
+  end
+
+  create_table "comments", force: :cascade do |t|
+    t.bigint "post_id", null: false
+    t.string "author_name", null: false
+    t.text "body", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["post_id", "created_at"], name: "index_comments_on_post_id_and_created_at"
   end
 
   create_table "posts", force: :cascade do |t|
@@ -32,5 +41,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_02_035134) do
     t.index ["created_at"], name: "index_posts_on_created_at"
   end
 
+  add_foreign_key "comments", "posts"
   add_foreign_key "posts", "categories"
 end

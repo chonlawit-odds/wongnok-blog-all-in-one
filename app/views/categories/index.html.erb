@@ -4,6 +4,9 @@
   <% if notice.present? %>
     <div role="status" id="notice" class="alert alert-success mb-5"><%= notice %></div>
   <% end %>
+  <% if alert.present? %>
+    <div role="alert" id="alert" class="alert alert-error mb-5"><%= alert %></div>
+  <% end %>
 
   <div class="flex justify-between items-center">
     <h1 class="font-bold text-4xl"><%= t(".title") %></h1>

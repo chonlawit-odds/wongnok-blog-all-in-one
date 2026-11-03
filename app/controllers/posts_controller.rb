@@ -1,5 +1,6 @@
 class PostsController < ApplicationController
   before_action :set_post, only: %i[ show edit update destroy ]
+  before_action :set_turbo_frame_variant, only: %i[ edit update ]
 
   # GET /posts or /posts.json
   def index
@@ -8,6 +9,8 @@ class PostsController < ApplicationController
 
   # GET /posts/1 or /posts/1.json
   def show
+    @comments = @post.comments.chronological
+    @comment = Comment.new
   end
 
   # GET /posts/new
@@ -61,6 +64,12 @@ class PostsController < ApplicationController
     # Use callbacks to share common setup or constraints between actions.
     def set_post
       @post = Post.find(params.expect(:id))
+    end
+
+    # แก้หัวข้อแบบ inline จาก turbo-frame ในหน้า show -> edit.html+turbo_frame.erb (ฟอร์มเฉพาะหัวข้อ)
+    # เปิด /posts/:id/edit ตรง ๆ ไม่มี header Turbo-Frame -> edit.html.erb หน้าเต็มเหมือนเดิม
+    def set_turbo_frame_variant
+      request.variant = :turbo_frame if turbo_frame_request?
     end
 
     # Only allow a list of trusted parameters through.

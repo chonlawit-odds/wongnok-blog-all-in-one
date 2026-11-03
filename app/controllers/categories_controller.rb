@@ -49,11 +49,16 @@ class CategoriesController < ApplicationController
 
   # DELETE /categories/1 or /categories/1.json
   def destroy
-    @category.destroy!
-
     respond_to do |format|
-      format.html { redirect_to categories_path, notice: t(".success"), status: :see_other }
-      format.json { head :no_content }
+      # has_many :posts, dependent: :restrict_with_error -> ยังมีบทความอยู่ destroy จะคืน false
+      # (destroy! จะ raise กลายเป็นหน้า error 500)
+      if @category.destroy
+        format.html { redirect_to categories_path, notice: t(".success"), status: :see_other }
+        format.json { head :no_content }
+      else
+        format.html { redirect_to categories_path, alert: t(".failure"), status: :see_other }
+        format.json { render json: @category.errors, status: :unprocessable_content }
+      end
     end
   end
 

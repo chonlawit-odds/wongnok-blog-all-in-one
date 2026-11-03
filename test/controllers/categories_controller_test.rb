@@ -17,7 +17,8 @@ class CategoriesControllerTest < ActionDispatch::IntegrationTest
 
   test "should create category" do
     assert_difference("Category.count") do
-      post categories_url, params: { category: { name: @category.name, slug: @category.slug } }
+      # slug ต้องไม่ซ้ำ (unique) จะใช้ค่าจาก fixture เหมือน scaffold เดิมไม่ได้
+      post categories_url, params: { category: { name: "กีฬา", slug: "sports" } }
     end
 
     assert_redirected_to category_url(Category.last)
@@ -38,11 +39,25 @@ class CategoriesControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to category_url(@category)
   end
 
-  test "should destroy category" do
+  test "should destroy category without posts" do
+    empty_category = Category.create!(name: "ยังไม่มีบทความ", slug: "empty")
+
     assert_difference("Category.count", -1) do
+      delete category_url(empty_category)
+    end
+
+    assert_redirected_to categories_url
+  end
+
+  test "should not destroy category that still has posts" do
+    assert @category.posts.exists?
+
+    assert_no_difference("Category.count") do
       delete category_url(@category)
     end
 
     assert_redirected_to categories_url
+    follow_redirect!
+    assert_select "[role=alert]", I18n.t("categories.destroy.failure")
   end
 end

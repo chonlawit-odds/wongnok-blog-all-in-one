@@ -48,6 +48,9 @@
 9. partial รับค่าผ่าน local เท่านั้น ห้ามอ้าง instance variable ข้างใน
 10. ห้ามใช้ raw หรือ html_safe กับข้อมูลที่มาจากผู้ใช้ ตัดข้อความด้วย truncate ไม่ใช่ substring (substring ตัดสระไทยขาด)
 11. ชื่อคลาส Tailwind ต้องเขียนเต็มเป็นข้อความ ห้ามต่อจากตัวแปร และใช้ semantic color ของ daisyUI (primary, base-100) ไม่ใช่ bg-blue-600
+12. JS ทุกบรรทัดอยู่ใน Stimulus controller ห้ามมี `<script>` ใน view controller ที่สร้างของใน connect ต้องเก็บกวาดใน disconnect
+13. turbo-frame id ใช้ dom_id() ทั้งสองฝั่ง ห้าม hardcode เป็น string
+14. render ใหม่หลัง validation ไม่ผ่าน ต้องมี status: :unprocessable_content และใช้ after_commit ไม่ใช่ after_save เมื่อต้องยิงงานต่อ
 
 ## รูปแบบการตอบ
 

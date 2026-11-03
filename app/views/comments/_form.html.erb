@@ -1,0 +1,38 @@
+<%# locals: (post:, comment:) -%>
+<%= form_with model: [post, comment], id: dom_id(post, :new_comment),
+      class: "card bg-base-100 text-base-content border border-base-300" do |form| %>
+  <div class="card-body gap-4">
+    <h3 class="card-title text-lg"><%= t(".title") %></h3>
+
+    <% if comment.errors.any? %>
+      <div role="alert" class="alert alert-error alert-soft flex-col items-start">
+        <p class="font-medium"><%= t(".error_header", count: comment.errors.count) %></p>
+        <ul class="list-disc ml-6">
+          <% comment.errors.each do |error| %>
+            <li><%= error.full_message %></li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+
+    <div>
+      <%= form.label :author_name, class: "label mb-2" %>
+      <%= form.text_field :author_name, maxlength: Comment::AUTHOR_NAME_MAX_LENGTH, autocomplete: "name",
+            class: ["input w-full", { "input-error": comment.errors[:author_name].any? }] %>
+    </div>
+
+    <%# ตัวนับตัวอักษร: app/javascript/controllers/character_counter_controller.js %>
+    <div data-controller="character-counter" data-character-counter-max-value="<%= Comment::BODY_MAX_LENGTH %>">
+      <%= form.label :body, class: "label mb-2" %>
+      <%= form.textarea :body, rows: 3, maxlength: Comment::BODY_MAX_LENGTH,
+            placeholder: t(".body_placeholder"),
+            data: { character_counter_target: "input" },
+            class: ["textarea w-full", { "textarea-error": comment.errors[:body].any? }] %>
+      <p class="mt-1 text-right text-sm text-base-content/60" data-character-counter-target="output"><%= comment.body.to_s.length %> / <%= Comment::BODY_MAX_LENGTH %></p>
+    </div>
+
+    <div class="card-actions justify-end">
+      <%= form.submit t(".submit"), class: "btn btn-primary" %>
+    </div>
+  </div>
+<% end %>

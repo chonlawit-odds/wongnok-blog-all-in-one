@@ -1,6 +1,8 @@
 require "test_helper"
 
 class PostsControllerTest < ActionDispatch::IntegrationTest
+  include ActionView::RecordIdentifier
+
   setup do
     @post = posts(:one)
   end
@@ -76,6 +78,41 @@ class PostsControllerTest < ActionDispatch::IntegrationTest
   test "should update post" do
     patch post_url(@post), params: { post: { category_id: @post.category_id, description: @post.description, title: @post.title } }
     assert_redirected_to post_url(@post)
+  end
+
+  test "show has inline title frame, comments, counter and stream source" do
+    get post_url(@post)
+
+    assert_select "turbo-frame##{dom_id(@post, :title)} h1", @post.title
+    assert_select "turbo-frame##{dom_id(@post, :title)} a[href=?]", edit_post_path(@post)
+    assert_select "turbo-cable-stream-source"
+    assert_select "##{dom_id(@post, :comments_count)}", text: /#{@post.comments.count}/
+    assert_select "##{dom_id(@post, :comments)} article", @post.comments.count
+    assert_select "form##{dom_id(@post, :new_comment)} [data-controller=character-counter]"
+  end
+
+  test "edit from turbo-frame renders only the inline title form" do
+    get edit_post_url(@post), headers: { "Turbo-Frame" => dom_id(@post, :title) }
+
+    assert_response :success
+    assert_select "turbo-frame##{dom_id(@post, :title)} input[name='post[title]']"
+    assert_select "textarea[name='post[description]']", false
+    assert_select "header.navbar", false
+  end
+
+  test "edit opened directly renders the full page" do
+    get edit_post_url(@post)
+
+    assert_response :success
+    assert_select "header.navbar"
+    assert_select "textarea[name='post[description]']"
+  end
+
+  test "invalid inline title update re-renders frame with 422" do
+    patch post_url(@post), params: { post: { title: "" } }, headers: { "Turbo-Frame" => dom_id(@post, :title) }
+
+    assert_response :unprocessable_content
+    assert_select "turbo-frame##{dom_id(@post, :title)} input.input-error"
   end
 
   test "should destroy post" do

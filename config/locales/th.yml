@@ -2,10 +2,14 @@ th:
   activerecord:
     models:
       category: หมวดหมู่
+      comment: ความคิดเห็น
     attributes:
       category:
         name: ชื่อหมวดหมู่
         slug: ชื่อใน URL (slug)
+      comment:
+        author_name: ชื่อผู้แสดงความคิดเห็น
+        body: ความคิดเห็น
   categories:
     index:
       title: หมวดหมู่
@@ -36,6 +40,7 @@ th:
       success: แก้ไขหมวดหมู่เรียบร้อยแล้ว
     destroy:
       success: ลบหมวดหมู่เรียบร้อยแล้ว
+      failure: ลบหมวดหมู่ไม่ได้ เพราะยังมีบทความอยู่ในหมวดหมู่นี้
   posts:
     index:
       title: บทความ
@@ -48,8 +53,26 @@ th:
       edit: แก้ไข
       destroy: ลบบทความ
       confirm_destroy: ยืนยันที่จะลบบทความนี้?
+      no_comments: ยังไม่มีความคิดเห็น มาเป็นคนแรกกันเลย
+    edit:
+      title_label: หัวข้อบทความ
+      save: บันทึก
+      cancel: ยกเลิก
     post:
       posted_ago: "%{time}ที่แล้ว"
+      edit_title: แก้ไขหัวข้อ
+  comments:
+    comment:
+      posted_ago: "%{time}ที่แล้ว"
+    count:
+      title: "ความคิดเห็น (%{count})"
+    form:
+      title: แสดงความคิดเห็น
+      body_placeholder: เขียนความคิดเห็นของคุณ...
+      submit: ส่งความคิดเห็น
+      error_header: "ส่งความคิดเห็นไม่ได้ มีข้อผิดพลาด %{count} รายการ:"
+    create:
+      success: เพิ่มความคิดเห็นเรียบร้อยแล้ว
   shared:
     navbar:
       brand: Wongnok Blog

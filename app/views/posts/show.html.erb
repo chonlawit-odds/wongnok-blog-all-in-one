@@ -1,6 +1,9 @@
 <% content_for :title, @post.title %>
 
 <div class="w-full max-w-3xl mx-auto">
+  <%# รับ broadcast ของโพสต์นี้ (comment ใหม่ + ตัวนับ) ผ่าน Action Cable %>
+  <%= turbo_stream_from @post %>
+
   <% if notice.present? %>
     <div role="status" id="notice" class="alert alert-success mb-6"><%= notice %></div>
   <% end %>
@@ -20,4 +23,18 @@
     <%= button_to t(".destroy"), @post, method: :delete, class: "btn btn-error",
           data: { turbo_confirm: t(".confirm_destroy") } %>
   </div>
+
+  <section class="mt-10">
+    <h2 id="<%= dom_id(@post, :comments_count) %>" class="text-xl font-bold mb-4">
+      <%= render "comments/count", post: @post %>
+    </h2>
+
+    <div id="<%= dom_id(@post, :comments) %>" class="flex flex-col gap-3 mb-6">
+      <%# โชว์เฉพาะตอนไม่มี comment: only:block = เป็นลูกตัวเดียวใน list %>
+      <p class="hidden only:block text-center text-base-content/60 py-6"><%= t(".no_comments") %></p>
+      <%= render @comments %>
+    </div>
+
+    <%= render "comments/form", post: @post, comment: @comment %>
+  </section>
 </div>

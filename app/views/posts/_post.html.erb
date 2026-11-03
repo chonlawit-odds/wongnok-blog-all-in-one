@@ -9,7 +9,14 @@
     </div>
 
     <% if full %>
-      <h1 class="text-2xl sm:text-3xl font-bold leading-snug"><%= post.title %></h1>
+      <%# แก้หัวข้อแบบ inline: id = dom_id(post, :title) ตรงกับ posts/edit.html+turbo_frame.erb
+          (ไม่ใช้ dom_id(post) เฉย ๆ เพราะ <article> ด้านบนใช้ id นั้นแล้ว) %>
+      <%= turbo_frame_tag post, :title, class: "block" do %>
+        <div class="flex items-start justify-between gap-3">
+          <h1 class="text-2xl sm:text-3xl font-bold leading-snug"><%= post.title %></h1>
+          <%= link_to t(".edit_title"), edit_post_path(post), class: "btn btn-ghost btn-sm shrink-0" %>
+        </div>
+      <% end %>
       <p class="whitespace-pre-line leading-relaxed"><%= post.description %></p>
     <% else %>
       <h2 class="card-title text-xl">
