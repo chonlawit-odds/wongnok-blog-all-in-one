@@ -1,4 +1,6 @@
 @import "tailwindcss";
+/* Trix / Action Text: อยู่ใน layer components ให้ utility class (เช่น border-error, min-h-60) ทับได้ */
+@import "./actiontext.css" layer(components);
 @source not "./daisyui{,*}.mjs";
 @plugin "./daisyui.mjs";
 

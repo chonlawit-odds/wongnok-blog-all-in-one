@@ -73,7 +73,8 @@ rows = posts_by_category.map { |slug, items| items.map { |title, intro| [ slug, 
 rows.each_with_index do |(slug, title, intro), index|
   Post.find_or_create_by!(title: title) do |post|
     post.category    = categories.fetch(slug)
-    post.description = "#{intro}\n\n#{closing_paragraphs.fetch(slug)}"
+    # body เป็น HTML ของ Action Text: escape ก่อน ให้ข้อความอย่าง <script> โชว์เป็นตัวอักษร (เหมือนข้อมูลที่ย้ายมาจาก description)
+    post.body = "<div>#{ERB::Util.html_escape(intro)}<br><br>#{ERB::Util.html_escape(closing_paragraphs.fetch(slug))}</div>"
     # กระจายเวลาตั้งแต่ไม่กี่นาทีจนถึงราวหนึ่งเดือนครึ่ง ให้ time_ago_in_words แสดงหลายแบบ
     post.created_at  = (index**3 * 3 + 2).minutes.ago
   end

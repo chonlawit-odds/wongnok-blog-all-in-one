@@ -1,6 +1,19 @@
 <%# locals: (post:, full: false) -%>
-<article id="<%= dom_id post %>" class="card bg-base-100 border border-base-300">
-  <div class="card-body gap-3">
+<article id="<%= dom_id post %>" class="card bg-base-100 border border-base-300 overflow-hidden <%= "sm:card-side" if !full && post.cover.attached? %>">
+  <% if post.cover.attached? %>
+    <%# รูปเป็น signed URL ของ Active Storage (redirect ไป MinIO แบบมีวันหมดอายุ) alt ว่างเพราะหัวข้ออยู่ข้าง ๆ แล้ว %>
+    <% if full %>
+      <figure>
+        <%= image_tag post.cover.variant(:large), alt: "", class: "w-full max-h-[28rem] object-cover" %>
+      </figure>
+    <% else %>
+      <figure class="sm:w-48 sm:shrink-0">
+        <%= image_tag post.cover.variant(:thumb), alt: "", loading: "lazy", class: "w-full h-48 sm:h-full object-cover" %>
+      </figure>
+    <% end %>
+  <% end %>
+
+  <div class="card-body gap-3 min-w-0">
     <div class="flex flex-wrap items-center gap-2 text-sm text-base-content/70">
       <span class="badge badge-primary badge-soft"><%= post.category.name %></span>
       <%= time_tag post.created_at,
@@ -17,13 +30,14 @@
           <%= link_to t(".edit_title"), edit_post_path(post), class: "btn btn-ghost btn-sm shrink-0" %>
         </div>
       <% end %>
-      <p class="whitespace-pre-line leading-relaxed"><%= post.description %></p>
+      <%# Action Text sanitize HTML ให้เองตอน render (ตัด <script>/onclick ฯลฯ) ห้าม raw/html_safe %>
+      <div class="leading-relaxed"><%= post.body %></div>
     <% else %>
       <h2 class="card-title text-xl">
         <%= link_to post.title, post, class: "link link-hover" %>
       </h2>
       <p class="text-base-content/80 leading-relaxed">
-        <%= truncate(post.description, length: 160, separator: /\s/) %>
+        <%= truncate(post.plain_text, length: 160, separator: /\s/) %>
       </p>
     <% end %>
   </div>

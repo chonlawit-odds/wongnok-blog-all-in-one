@@ -1,0 +1,11 @@
+# เนื้อหา (has_rich_text :body) ของ test/fixtures/posts.yml
+
+post_one_body:
+  record: one (Post)
+  name: body
+  body: <div>MyText</div>
+
+post_two_body:
+  record: two (Post)
+  name: body
+  body: <div>MyText</div>

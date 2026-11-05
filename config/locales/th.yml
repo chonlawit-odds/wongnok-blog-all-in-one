@@ -3,13 +3,27 @@ th:
     models:
       category: หมวดหมู่
       comment: ความคิดเห็น
+      post: บทความ
     attributes:
+      post:
+        title: หัวข้อ
+        body: เนื้อหา
+        cover: รูปปก
+        category: หมวดหมู่
+        category_id: หมวดหมู่
       category:
         name: ชื่อหมวดหมู่
         slug: ชื่อใน URL (slug)
       comment:
         author_name: ชื่อผู้แสดงความคิดเห็น
         body: ความคิดเห็น
+    errors:
+      models:
+        post:
+          attributes:
+            cover:
+              invalid_image_type: ต้องเป็นไฟล์รูป PNG, JPEG หรือ WebP เท่านั้น
+              file_too_large: "ต้องมีขนาดไม่เกิน %{size}"
   categories:
     index:
       title: หมวดหมู่
@@ -61,6 +75,8 @@ th:
     post:
       posted_ago: "%{time}ที่แล้ว"
       edit_title: แก้ไขหัวข้อ
+    form:
+      cover_hint: "ไฟล์ PNG, JPEG หรือ WebP ขนาดไม่เกิน %{size}"
   comments:
     comment:
       posted_ago: "%{time}ที่แล้ว"

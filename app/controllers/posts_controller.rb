@@ -3,8 +3,9 @@ class PostsController < ApplicationController
   before_action :set_turbo_frame_variant, only: %i[ edit update ]
 
   # GET /posts or /posts.json
+  # ข้อความย่อใช้คอลัมน์ plain_text จึงไม่ต้องโหลด rich text ของทุกโพสต์มาที่หน้านี้
   def index
-    @pagy, @posts = pagy(Post.includes(:category).recent, limit: 10)
+    @pagy, @posts = pagy(Post.includes(:category).with_attached_cover.recent, limit: 10)
   end
 
   # GET /posts/1 or /posts/1.json
@@ -63,7 +64,7 @@ class PostsController < ApplicationController
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_post
-      @post = Post.find(params.expect(:id))
+      @post = Post.with_rich_text_body.with_attached_cover.find(params.expect(:id))
     end
 
     # แก้หัวข้อแบบ inline จาก turbo-frame ในหน้า show -> edit.html+turbo_frame.erb (ฟอร์มเฉพาะหัวข้อ)
@@ -74,6 +75,6 @@ class PostsController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def post_params
-      params.expect(post: [ :title, :description, :category_id ])
+      params.expect(post: [ :title, :body, :cover, :category_id ])
     end
 end

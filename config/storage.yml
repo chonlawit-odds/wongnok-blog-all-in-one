@@ -6,6 +6,18 @@ local:
   service: Disk
   root: <%= Rails.root.join("storage") %>
 
+# MinIO (S3-compatible) จาก compose.yaml  console: http://localhost:9001
+# key อยู่ใน credentials (bin/rails credentials:edit -> minio: access_key_id / secret_access_key) ห้ามเขียนลงไฟล์นี้
+# bucket เป็น private: เบราว์เซอร์เข้าถึงไฟล์ได้ผ่าน signed URL ที่หมดอายุเท่านั้น
+minio:
+  service: S3
+  endpoint: <%= ENV.fetch("MINIO_ENDPOINT", "http://localhost:9000") %>
+  access_key_id: <%= Rails.application.credentials.dig(:minio, :access_key_id) %>
+  secret_access_key: <%= Rails.application.credentials.dig(:minio, :secret_access_key) %>
+  region: us-east-1
+  bucket: wongnok-blog-<%= Rails.env %>
+  force_path_style: true
+
 # Use bin/rails credentials:edit to set the AWS secrets (as aws:access_key_id|secret_access_key)
 # amazon:
 #   service: S3

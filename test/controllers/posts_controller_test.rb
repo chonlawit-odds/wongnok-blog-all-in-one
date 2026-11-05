@@ -30,11 +30,19 @@ class PostsControllerTest < ActionDispatch::IntegrationTest
     assert_select "a[rel=prev][href=?]", posts_path(page: 1)
   end
 
-  test "index loads a page with at most 3 queries" do
-    create_posts(11)
+  test "index shows cover thumbnail from a variant" do
+    @post.update!(cover: fixture_file_upload("cover.png"))
 
-    # count + posts + categories (includes) — ไม่มี N+1
-    assert_queries_count(3) { get posts_url }
+    get posts_url
+    assert_select "##{dom_id(@post)} figure img[src*=?]", "/rails/active_storage/representations/"
+    assert_select "##{dom_id(posts(:two))} figure", false
+  end
+
+  test "index loads a page with at most 6 queries" do
+    create_posts(11, with_cover: true)
+
+    # count + posts + categories + cover attachments + blobs — ไม่มี N+1 และไม่โหลด rich text (ข้อความย่อใช้ plain_text)
+    assert_queries_count(5) { get posts_url }
   end
 
   test "show has breadcrumb back to index" do
@@ -44,25 +52,62 @@ class PostsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "user content is escaped" do
-    xss_post = Post.create!(title: "<script>alert('xss')</script>", description: "<b>ตัวหนา</b>", category: categories(:one))
+    xss_post = Post.create!(
+      title: "<script>alert('xss')</script>",
+      body: "<div><b>ตัวหนา</b><script>alert('body')</script><a href=\"javascript:alert(1)\" onclick=\"alert(2)\">ลิงก์</a></div>",
+      category: categories(:one)
+    )
 
     get post_url(xss_post)
     assert_not_includes response.body, "<script>alert("
-    assert_not_includes response.body, "<b>ตัวหนา</b>"
     assert_includes response.body, "&lt;script&gt;"
+    # body เป็น rich text: ตัวหนาได้ แต่ script / javascript: / onclick ต้องโดน sanitize ทิ้ง
+    assert_select ".trix-content b", "ตัวหนา"
+    assert_select ".trix-content a", "ลิงก์"
+    assert_select ".trix-content a[href^='javascript']", false
+    assert_select ".trix-content a[onclick]", false
+  end
+
+  test "show renders rich text body and cover" do
+    @post.update!(body: "<div><strong>สำคัญ</strong> <a href=\"https://example.com\">อ่านต่อ</a></div>", cover: fixture_file_upload("cover.png"))
+
+    get post_url(@post)
+    assert_select ".trix-content strong", "สำคัญ"
+    assert_select ".trix-content a[href='https://example.com']", "อ่านต่อ"
+    assert_select "##{dom_id(@post)} figure img[src*=?]", "/rails/active_storage/representations/"
   end
 
   test "should get new" do
     get new_post_url
     assert_response :success
+    assert_select "trix-editor[input]"
+    assert_select "input[type=file][name='post[cover]'][data-direct-upload-url]"
   end
 
   test "should create post" do
     assert_difference("Post.count") do
-      post posts_url, params: { post: { category_id: @post.category_id, description: @post.description, title: @post.title } }
+      post posts_url, params: { post: { category_id: @post.category_id, body: "<div><strong>เนื้อหา</strong></div>", title: @post.title } }
     end
 
     assert_redirected_to post_url(Post.last)
+    assert_equal "เนื้อหา", Post.last.plain_text
+  end
+
+  test "should create post with cover" do
+    assert_difference([ "Post.count", "ActiveStorage::Attachment.count" ]) do
+      post posts_url, params: { post: { category_id: @post.category_id, body: "<div>เนื้อหา</div>", title: "มีรูปปก", cover: fixture_file_upload("cover.webp") } }
+    end
+
+    assert_equal "image/webp", Post.last.cover.content_type
+  end
+
+  test "create rejects a text file renamed to .png" do
+    assert_no_difference([ "Post.count", "ActiveStorage::Attachment.count" ]) do
+      post posts_url, params: { post: { category_id: @post.category_id, body: "<div>เนื้อหา</div>", title: "รูปปลอม", cover: fixture_file_upload("not_an_image.png", "image/png") } }
+    end
+
+    assert_response :unprocessable_content
+    assert_select "input[type=file].file-input-error"
   end
 
   test "should show post" do
@@ -76,8 +121,18 @@ class PostsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should update post" do
-    patch post_url(@post), params: { post: { category_id: @post.category_id, description: @post.description, title: @post.title } }
+    patch post_url(@post), params: { post: { category_id: @post.category_id, body: "<div>แก้แล้ว</div>", title: @post.title } }
     assert_redirected_to post_url(@post)
+    assert_equal "แก้แล้ว", @post.reload.plain_text
+  end
+
+  test "update without choosing a new file keeps the existing cover" do
+    @post.update!(cover: fixture_file_upload("cover.png"))
+    blob = @post.cover.blob
+
+    patch post_url(@post), params: { post: { title: "แก้แค่หัวข้อ" } }
+    assert_redirected_to post_url(@post)
+    assert_equal blob, @post.reload.cover.blob
   end
 
   test "show has inline title frame, comments, counter and stream source" do
@@ -96,7 +151,7 @@ class PostsControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_select "turbo-frame##{dom_id(@post, :title)} input[name='post[title]']"
-    assert_select "textarea[name='post[description]']", false
+    assert_select "trix-editor", false
     assert_select "header.navbar", false
   end
 
@@ -105,7 +160,7 @@ class PostsControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_select "header.navbar"
-    assert_select "textarea[name='post[description]']"
+    assert_select "trix-editor[input]"
   end
 
   test "invalid inline title update re-renders frame with 422" do
@@ -124,9 +179,11 @@ class PostsControllerTest < ActionDispatch::IntegrationTest
   end
 
   private
-    def create_posts(count)
+    def create_posts(count, with_cover: false)
       count.times do |i|
-        Post.create!(title: "โพสต์ทดสอบ #{i}", description: "เนื้อหาทดสอบ", category: categories(i.even? ? :one : :two))
+        post = Post.new(title: "โพสต์ทดสอบ #{i}", body: "<div>เนื้อหาทดสอบ</div>", category: categories(i.even? ? :one : :two))
+        post.cover.attach(fixture_file_upload("cover.png")) if with_cover
+        post.save!
       end
     end
 end

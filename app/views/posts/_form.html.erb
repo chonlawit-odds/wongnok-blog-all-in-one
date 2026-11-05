@@ -17,8 +17,20 @@
   </div>
 
   <div class="my-5">
-    <%= form.label :description, class: "label mb-2" %>
-    <%= form.textarea :description, rows: 4, class: ["textarea w-full", {"textarea-error": post.errors[:description].any?}] %>
+    <%= form.label :body, class: "label mb-2" %>
+    <%= form.rich_textarea :body, class: ["trix-content min-h-60", {"border-error": post.errors[:body].any?}] %>
+  </div>
+
+  <div class="my-5">
+    <%= form.label :cover, class: "label mb-2" %>
+    <%# โชว์เฉพาะรูปที่บันทึกแล้ว: ถ้าเพิ่งเลือกไฟล์ใหม่แต่ validate ไม่ผ่าน ไฟล์นั้นอาจไม่ใช่รูป %>
+    <% if post.cover.attached? && post.cover.persisted? %>
+      <%= image_tag post.cover.variant(:thumb), alt: "", class: "mb-3 h-32 w-auto rounded-box border border-base-300" %>
+    <% end %>
+    <%# direct_upload: เบราว์เซอร์อัปไฟล์ขึ้น MinIO (:9000) ตรง ไม่ผ่าน Rails  accept แค่ช่วยกรองตอนเลือกไฟล์ ของจริงตรวจที่ model %>
+    <%= form.file_field :cover, direct_upload: true, accept: Post::COVER_CONTENT_TYPES.join(","),
+          class: ["file-input w-full", {"file-input-error": post.errors[:cover].any?}] %>
+    <p class="mt-1 text-sm text-base-content/60"><%= t(".cover_hint", size: number_to_human_size(Post::COVER_MAX_SIZE)) %></p>
   </div>
 
   <div class="my-5">

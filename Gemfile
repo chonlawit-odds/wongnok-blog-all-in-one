@@ -75,3 +75,5 @@ gem "rack-mini-profiler", "~> 5.0", group: :development
 gem "pagy", "~> 43.5"
 
 gem "rails-i18n", "~> 8.1"
+
+gem "aws-sdk-s3", "~> 1.238", require: false
