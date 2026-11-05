@@ -16,9 +16,16 @@
   <div class="card-body gap-3 min-w-0">
     <div class="flex flex-wrap items-center gap-2 text-sm text-base-content/70">
       <span class="badge badge-primary badge-soft"><%= post.category.name %></span>
-      <%= time_tag post.created_at,
-            t(".posted_ago", time: time_ago_in_words(post.created_at)),
-            title: l(post.created_at, format: :long) %>
+      <% if post.published? %>
+        <%= time_tag post.published_at,
+              t(".posted_ago", time: time_ago_in_words(post.published_at)),
+              title: l(post.published_at, format: :long) %>
+      <% else %>
+        <%= post_status_badge(post) %>
+        <% if post.scheduled? %>
+          <%= time_tag post.scheduled_at, t(".scheduled_for", time: l(post.scheduled_at, format: :short)) %>
+        <% end %>
+      <% end %>
     </div>
 
     <% if full %>

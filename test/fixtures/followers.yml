@@ -1,0 +1,8 @@
+# ติดตามมาก่อนโพสต์ทุกโพสต์ใน test
+ann:
+  email: ann@example.com
+  created_at: <%= 1.week.ago %>
+
+bob:
+  email: bob@example.com
+  created_at: <%= 1.week.ago %>

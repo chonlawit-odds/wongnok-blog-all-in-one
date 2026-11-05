@@ -10,9 +10,20 @@
     <%= link_to t(".new_post"), new_post_path, class: "btn btn-primary" %>
   </div>
 
+  <div role="tablist" class="tabs tabs-box mb-6">
+    <%= link_to t(".tab_published"), posts_path, role: "tab",
+          class: class_names("tab", "tab-active": !@pending), aria: { selected: !@pending } %>
+    <%= link_to t(".tab_pending"), posts_path(view: "pending"), role: "tab",
+          class: class_names("tab", "tab-active": @pending), aria: { selected: @pending } %>
+  </div>
+
   <div id="posts" class="space-y-4">
-    <%= render(@posts) || tag.p(t(".empty"), class: "text-center text-base-content/60 my-10") %>
+    <%= render(@posts) || tag.p(t(@pending ? ".empty_pending" : ".empty"), class: "text-center text-base-content/60 my-10") %>
   </div>
 
   <%= render "shared/pagination", pagy: @pagy %>
+
+  <div class="mt-10">
+    <%= render "followers/form", follower: @follower %>
+  </div>
 </div>

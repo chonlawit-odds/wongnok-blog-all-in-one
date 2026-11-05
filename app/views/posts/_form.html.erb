@@ -41,6 +41,33 @@
           class: ["select w-full", {"select-error": post.errors[:category].any?}] %>
   </div>
 
+  <%# เผยแพร่แล้วเลือกสถานะไม่ได้อีก  ส่วน "เผยแพร่ทันที" เป็นปุ่มในหน้า show (เข้าคิว PublishPostJob)
+      เช็ก published_at ด้วย: ถ้ามีคนส่ง status=published มาเอง ค่าในหน่วยความจำเป็น published แต่ยังไม่มีเวลาเผยแพร่ %>
+  <% if post.published? && post.published_at? %>
+    <p class="my-5 text-sm text-base-content/60">
+      <%= t(".published_at", time: l(post.published_at, format: :long)) %>
+    </p>
+  <% else %>
+    <fieldset class="fieldset my-5">
+      <legend class="fieldset-legend"><%= t(".publishing") %></legend>
+
+      <label class="label cursor-pointer gap-2">
+        <%= form.radio_button :status, "draft", class: "radio radio-sm" %>
+        <%= t(".status_draft") %>
+      </label>
+      <label class="label cursor-pointer gap-2">
+        <%= form.radio_button :status, "scheduled", class: "radio radio-sm" %>
+        <%= t(".status_scheduled") %>
+      </label>
+
+      <%= form.label :scheduled_at, class: "label mt-2" %>
+      <%# datetime-local ไม่มีโซนเวลา Rails ตีความเป็น config.time_zone (Asia/Bangkok) %>
+      <%= form.datetime_field :scheduled_at, include_seconds: false,
+            class: ["input w-full sm:w-auto", {"input-error": post.errors[:scheduled_at].any?}] %>
+      <p class="text-sm text-base-content/60"><%= t(".scheduled_at_hint") %></p>
+    </fieldset>
+  <% end %>
+
   <div class="inline">
     <%= form.submit class: "btn btn-primary w-full sm:w-auto" %>
   </div>

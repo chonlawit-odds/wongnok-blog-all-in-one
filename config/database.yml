@@ -19,13 +19,28 @@ default: &default
   port: <%= ENV.fetch("DATABASE_PORT", 5432) %>
   username: <%= ENV.fetch("DATABASE_USER", "postgres") %>
   password: <%= ENV.fetch("DATABASE_PASSWORD", "postgres") %>
+  # macOS: libpq ลองเข้ารหัสแบบ GSSAPI (Kerberos) ก่อน ซึ่งพังใน process ที่ fork มา
+  # (bin/jobs fork worker, test แบบ parallel ก็ fork) -> Segmentation fault ใน PG::Connection#connect_start
+  # ไม่ได้ใช้ Kerberos อยู่แล้ว (ล็อกอินด้วยรหัสผ่าน) จึงปิดไป
+  gssencmode: disable
   # For details on connection pooling, see Rails configuration guide
   # https://guides.rubyonrails.org/configuring.html#database-pooling
   max_connections: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
 
+# แยก DB ของ Solid Queue / Solid Cable เหมือน production: bin/rails db:prepare สร้างให้และโหลด
+# db/queue_schema.rb, db/cable_schema.rb  ดูตารางคิวได้ด้วย bin/rails dbconsole --database queue
 development:
-  <<: *default
-  database: wongnok_blog_all_in_one_development
+  primary:
+    <<: *default
+    database: wongnok_blog_all_in_one_development
+  queue:
+    <<: *default
+    database: wongnok_blog_all_in_one_development_queue
+    migrations_paths: db/queue_migrate
+  cable:
+    <<: *default
+    database: wongnok_blog_all_in_one_development_cable
+    migrations_paths: db/cable_migrate
 
   # The specified database role being used to connect to PostgreSQL.
   # To create additional roles in PostgreSQL see `$ createuser --help`.

@@ -40,6 +40,15 @@ Rails.application.configure do
   # Set localhost to be used by links generated in mailer templates.
   config.action_mailer.default_url_options = { host: "localhost", port: 3000 }
 
+  # ส่งอีเมลเข้า Mailpit (docker compose up -d) ดูกล่องจดหมายที่ http://localhost:8025
+  config.action_mailer.delivery_method = :smtp
+  config.action_mailer.smtp_settings = { address: "localhost", port: 1025 }
+
+  # งานเบื้องหลังเข้าคิว Solid Queue (DB queue แยก ดู config/database.yml) แล้ว bin/jobs ใน Procfile.dev หยิบไปทำ
+  # ปิด bin/jobs อยู่ งานก็ยังรอในตาราง solid_queue_* ไม่หาย
+  config.active_job.queue_adapter = :solid_queue
+  config.solid_queue.connects_to = { database: { writing: :queue } }
+
   # Print deprecation notices to the Rails logger.
   config.active_support.deprecation = :log
 

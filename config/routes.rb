@@ -1,7 +1,10 @@
 Rails.application.routes.draw do
   resources :posts do
     resources :comments, only: :create
+    # ปุ่ม "เผยแพร่ทันที": POST /posts/:post_id/publication -> Posts::PublicationsController#create
+    resource :publication, only: :create, module: :posts
   end
+  resources :followers, only: %i[ new create ]
   resources :categories
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 

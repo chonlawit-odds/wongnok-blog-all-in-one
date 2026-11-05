@@ -5,8 +5,12 @@ class PostsController < ApplicationController
 
   # GET /posts or /posts.json
   # ข้อความย่อใช้คอลัมน์ plain_text จึงไม่ต้องโหลด rich text ของทุกโพสต์มาที่หน้านี้
+  # ปกติโชว์เฉพาะที่เผยแพร่แล้ว  ?view=pending = ฉบับร่าง + ที่ตั้งเวลาไว้ (ไว้ให้ผู้เขียนกลับไปแก้)
   def index
-    @pagy, @posts = pagy(Post.includes(:category).with_attached_cover.recent, limit: 10)
+    @pending = params[:view] == "pending"
+    posts = @pending ? Post.not_published.recent : Post.latest_published
+    @pagy, @posts = pagy(posts.includes(:category).with_attached_cover, limit: 10)
+    @follower = Follower.new
   end
 
   # GET /posts/1 or /posts/1.json
@@ -81,7 +85,9 @@ class PostsController < ApplicationController
     end
 
     # Only allow a list of trusted parameters through.
+    # status รับได้แค่ draft/scheduled ในทางปฏิบัติ: ไม่รับ published_at จากฟอร์ม
+    # ส่ง status=published มาเองจะติด validation (published_at ว่าง) ต้องผ่าน PublishPostJob เท่านั้น
     def post_params
-      params.expect(post: [ :title, :body, :cover, :category_id ])
+      params.expect(post: [ :title, :body, :cover, :category_id, :status, :scheduled_at ])
     end
 end

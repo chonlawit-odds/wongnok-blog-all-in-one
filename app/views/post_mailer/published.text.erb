@@ -1,0 +1,9 @@
+<%= t(".intro") %>
+
+<%= @post.title %>
+
+<%= truncate(@post.plain_text, length: 200, separator: /\s/) %>
+
+<%= t(".read_more") %>: <%= post_url(@post) %>
+
+<%= t(".footer", email: @follower.email) %>

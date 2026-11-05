@@ -1,14 +1,19 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 # body อยู่ใน test/fixtures/action_text/rich_texts.yml  description ยังเก็บไว้ช่วง expand-contract
+# ทั้งสองโพสต์เผยแพร่แล้ว (โผล่ในหน้ารายการ)  ฉบับร่าง/ตั้งเวลา สร้างในแต่ละ test เอง
 
 one:
   title: MyString
   description: MyText
   plain_text: MyText
   category: one
+  status: published
+  published_at: <%= 1.day.ago %>
 
 two:
   title: MyString
   description: MyText
   plain_text: MyText
   category: two
+  status: published
+  published_at: <%= 2.days.ago %>

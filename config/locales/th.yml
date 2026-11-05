@@ -3,6 +3,7 @@ th:
     models:
       category: หมวดหมู่
       comment: ความคิดเห็น
+      follower: ผู้ติดตาม
       post: บทความ
     attributes:
       post:
@@ -11,6 +12,16 @@ th:
         cover: รูปปก
         category: หมวดหมู่
         category_id: หมวดหมู่
+        status: สถานะ
+        scheduled_at: เวลาที่ตั้งเผยแพร่
+        published_at: เวลาที่เผยแพร่
+      # Post.human_attribute_name("status.draft") ดู PostsHelper#post_status_badge
+      post/status:
+        draft: ฉบับร่าง
+        scheduled: ตั้งเวลาไว้
+        published: เผยแพร่แล้ว
+      follower:
+        email: อีเมล
       category:
         name: ชื่อหมวดหมู่
         slug: ชื่อใน URL (slug)
@@ -24,6 +35,8 @@ th:
             cover:
               invalid_image_type: ต้องเป็นไฟล์รูป PNG, JPEG หรือ WebP เท่านั้น
               file_too_large: "ต้องมีขนาดไม่เกิน %{size}"
+            scheduled_at:
+              in_the_past: ต้องไม่ย้อนหลังไปก่อนเวลาปัจจุบัน
   categories:
     index:
       title: หมวดหมู่
@@ -60,6 +73,9 @@ th:
       title: บทความ
       new_post: เขียนบทความใหม่
       empty: ยังไม่มีบทความ
+      empty_pending: ไม่มีฉบับร่างหรือบทความที่ตั้งเวลาไว้
+      tab_published: เผยแพร่แล้ว
+      tab_pending: ฉบับร่าง / ตั้งเวลาไว้
     show:
       breadcrumb: เส้นทางนำทาง
       breadcrumb_root: บทความทั้งหมด
@@ -68,16 +84,48 @@ th:
       destroy: ลบบทความ
       confirm_destroy: ยืนยันที่จะลบบทความนี้?
       no_comments: ยังไม่มีความคิดเห็น มาเป็นคนแรกกันเลย
+      draft_notice: บทความนี้ยังเป็นฉบับร่าง ผู้อ่านยังไม่เห็น
+      scheduled_notice: "ตั้งเวลาเผยแพร่ไว้ %{time}"
+      publish_now: เผยแพร่ทันที
+      confirm_publish_now: เผยแพร่และส่งอีเมลแจ้งผู้ติดตามตอนนี้เลยไหม?
     edit:
       title_label: หัวข้อบทความ
       save: บันทึก
       cancel: ยกเลิก
     post:
       posted_ago: "%{time}ที่แล้ว"
+      scheduled_for: "จะเผยแพร่ %{time}"
       edit_title: แก้ไขหัวข้อ
     form:
       cover_hint: "ไฟล์ PNG, JPEG หรือ WebP ขนาดไม่เกิน %{size}"
       category_prompt: เลือกหมวดหมู่
+      publishing: การเผยแพร่
+      status_draft: เก็บเป็นฉบับร่าง
+      status_scheduled: ตั้งเวลาเผยแพร่
+      scheduled_at_hint: เวลาประเทศไทย ถึงเวลาแล้วระบบจะเผยแพร่และแจ้งผู้ติดตามให้เองภายในราว 1 นาที
+      published_at: "เผยแพร่แล้วเมื่อ %{time}"
+    publications:
+      create:
+        success: เข้าคิวเผยแพร่แล้ว ระบบจะเผยแพร่และส่งอีเมลแจ้งผู้ติดตามในไม่ช้า
+        already_published: บทความนี้เผยแพร่ไปแล้ว
+  followers:
+    form:
+      title: ติดตามบล็อก
+      description: รับอีเมลแจ้งเตือนเมื่อมีบทความใหม่เผยแพร่
+      email_placeholder: you@example.com
+      submit: ติดตาม
+      error_header: "ติดตามไม่ได้ มีข้อผิดพลาด %{count} รายการ:"
+    new:
+      title: ติดตามบล็อก
+      back: กลับไปหน้ารายการ
+    create:
+      success: ติดตามเรียบร้อยแล้ว เราจะส่งอีเมลหาคุณเมื่อมีบทความใหม่
+  post_mailer:
+    published:
+      subject: "บทความใหม่: %{title}"
+      intro: มีบทความใหม่ที่คุณติดตามเพิ่งเผยแพร่
+      read_more: อ่านบทความ
+      footer: "คุณได้รับอีเมลนี้เพราะ %{email} ติดตาม Wongnok Blog"
   comments:
     comment:
       posted_ago: "%{time}ที่แล้ว"

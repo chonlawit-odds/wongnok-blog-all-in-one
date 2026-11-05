@@ -1,0 +1,9 @@
+<p><%= t(".intro") %></p>
+
+<h1><%= @post.title %></h1>
+
+<p><%= truncate(@post.plain_text, length: 200, separator: /\s/) %></p>
+
+<p><%= link_to t(".read_more"), post_url(@post) %></p>
+
+<p><small><%= t(".footer", email: @follower.email) %></small></p>

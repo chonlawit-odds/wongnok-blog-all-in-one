@@ -15,6 +15,21 @@
     </ul>
   </nav>
 
+  <% unless @post.published? %>
+    <div role="status" class="alert alert-info alert-soft mb-6 flex flex-wrap items-center justify-between gap-3">
+      <span>
+        <% if @post.scheduled? %>
+          <%= t(".scheduled_notice", time: l(@post.scheduled_at, format: :long)) %>
+        <% else %>
+          <%= t(".draft_notice") %>
+        <% end %>
+      </span>
+      <%# เข้าคิว PublishPostJob (Posts::PublicationsController) ไม่ได้เผยแพร่ใน request นี้ %>
+      <%= button_to t(".publish_now"), post_publication_path(@post), class: "btn btn-primary btn-sm",
+            data: { turbo_confirm: t(".confirm_publish_now") } %>
+    </div>
+  <% end %>
+
   <%= render @post, full: true %>
 
   <div class="flex flex-wrap gap-2 mt-6">

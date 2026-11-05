@@ -23,6 +23,11 @@ services:
     ports: ["9000:9000", "9001:9001"]
     volumes: ["miniodata:/data"]
 
+  # SMTP ปลอมสำหรับ dev: อีเมลไม่ออกไปจริง ดูได้ที่ http://localhost:8025
+  mailpit:
+    image: axllent/mailpit
+    ports: ["1025:1025", "8025:8025"]
+
 volumes:
   pgdata:
   miniodata:

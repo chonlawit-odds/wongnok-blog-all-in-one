@@ -14,7 +14,7 @@ class PostsControllerTest < ActionDispatch::IntegrationTest
 
   test "index shows category name instead of category_id" do
     get posts_url
-    assert_select "#posts article", Post.count
+    assert_select "#posts article", Post.published.count
     assert_select "#posts .badge", text: categories(:one).name
   end
 
@@ -43,6 +43,84 @@ class PostsControllerTest < ActionDispatch::IntegrationTest
 
     # count + posts + categories + cover attachments + blobs — ไม่มี N+1 และไม่โหลด rich text (ข้อความย่อใช้ plain_text)
     assert_queries_count(5) { get posts_url }
+  end
+
+  test "index lists only published posts, newest published first" do
+    draft = create_post(title: "ฉบับร่าง")
+    scheduled = create_post(title: "ตั้งเวลาไว้", status: :scheduled, scheduled_at: 1.hour.from_now)
+
+    get posts_url
+    assert_select "##{dom_id(draft)}", false
+    assert_select "##{dom_id(scheduled)}", false
+    assert_select "#posts article:first-child##{dom_id(posts(:one))}"
+  end
+
+  test "pending tab lists drafts and scheduled posts with their status" do
+    draft = create_post(title: "ฉบับร่าง")
+    scheduled = create_post(title: "ตั้งเวลาไว้", status: :scheduled, scheduled_at: 1.hour.from_now)
+
+    get posts_url(view: "pending")
+    assert_select "#posts article", 2
+    assert_select "##{dom_id(draft)} .badge", text: "ฉบับร่าง"
+    assert_select "##{dom_id(scheduled)} .badge", text: "ตั้งเวลาไว้"
+    assert_select "##{dom_id(posts(:one))}", false
+  end
+
+  test "create a scheduled post" do
+    scheduled_at = 1.hour.from_now.change(sec: 0)
+
+    assert_difference("Post.count") do
+      post posts_url, params: { post: { category_id: @post.category_id, body: "<div>เนื้อหา</div>", title: "ตั้งเวลา",
+                                        status: "scheduled", scheduled_at: scheduled_at.strftime("%Y-%m-%dT%H:%M") } }
+    end
+
+    created = Post.order(:id).last
+    assert created.scheduled?
+    assert_equal scheduled_at, created.scheduled_at
+  end
+
+  test "create rejects a schedule in the past" do
+    assert_no_difference("Post.count") do
+      post posts_url, params: { post: { category_id: @post.category_id, body: "<div>เนื้อหา</div>", title: "ย้อนหลัง",
+                                        status: "scheduled", scheduled_at: 1.day.ago.strftime("%Y-%m-%dT%H:%M") } }
+    end
+
+    assert_response :unprocessable_content
+    assert_select "input.input-error[name='post[scheduled_at]']"
+  end
+
+  test "reschedule an existing scheduled post" do
+    scheduled = create_post(status: :scheduled, scheduled_at: 1.hour.from_now)
+    new_time = 3.hours.from_now.change(sec: 0)
+
+    patch post_url(scheduled), params: { post: { scheduled_at: new_time.strftime("%Y-%m-%dT%H:%M") } }
+
+    assert_redirected_to post_url(scheduled)
+    assert_equal new_time, scheduled.reload.scheduled_at
+  end
+
+  test "cannot publish directly through the form" do
+    draft = create_post
+
+    patch post_url(draft), params: { post: { status: "published" } }
+
+    assert_response :unprocessable_content
+    assert draft.reload.draft?
+  end
+
+  test "show of a draft has the publish now button" do
+    draft = create_post
+
+    get post_url(draft)
+    assert_select "form[action=?] button", post_publication_path(draft)
+  end
+
+  test "show of a published post has no publish now button and its form hides the status" do
+    get post_url(@post)
+    assert_select "form[action=?]", post_publication_path(@post), false
+
+    get edit_post_url(@post)
+    assert_select "input[name='post[status]']", false
   end
 
   test "show has breadcrumb back to index" do
@@ -202,9 +280,15 @@ class PostsControllerTest < ActionDispatch::IntegrationTest
   end
 
   private
+    def create_post(**attributes)
+      Post.create!(title: "โพสต์ทดสอบ", body: "<div>เนื้อหาทดสอบ</div>", category: categories(:one), **attributes)
+    end
+
+    # โพสต์ที่เผยแพร่แล้ว (หน้ารายการโชว์เฉพาะสถานะนี้)
     def create_posts(count, with_cover: false)
       count.times do |i|
-        post = Post.new(title: "โพสต์ทดสอบ #{i}", body: "<div>เนื้อหาทดสอบ</div>", category: categories(i.even? ? :one : :two))
+        post = Post.new(title: "โพสต์ทดสอบ #{i}", body: "<div>เนื้อหาทดสอบ</div>", category: categories(i.even? ? :one : :two),
+                        status: :published, published_at: Time.current)
         post.cover.attach(fixture_file_upload("cover.png")) if with_cover
         post.save!
       end

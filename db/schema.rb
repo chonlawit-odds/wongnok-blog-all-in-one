@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_05_044225) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_05_100007) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -69,6 +69,23 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_05_044225) do
     t.index ["post_id", "created_at"], name: "index_comments_on_post_id_and_created_at"
   end
 
+  create_table "followers", force: :cascade do |t|
+    t.string "email", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["created_at"], name: "index_followers_on_created_at"
+    t.index ["email"], name: "index_followers_on_email", unique: true
+  end
+
+  create_table "post_notifications", force: :cascade do |t|
+    t.bigint "post_id", null: false
+    t.bigint "follower_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["follower_id"], name: "index_post_notifications_on_follower_id"
+    t.index ["post_id", "follower_id"], name: "index_post_notifications_on_post_id_and_follower_id", unique: true
+  end
+
   create_table "posts", force: :cascade do |t|
     t.string "title", null: false
     t.text "description", null: false
@@ -76,12 +93,22 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_05_044225) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.text "plain_text"
+    t.string "status", default: "draft", null: false
+    t.datetime "scheduled_at"
+    t.datetime "published_at"
     t.index ["category_id"], name: "index_posts_on_category_id"
     t.index ["created_at"], name: "index_posts_on_created_at"
+    t.index ["published_at"], name: "index_posts_on_published_at", where: "((status)::text = 'published'::text)"
+    t.index ["scheduled_at"], name: "index_posts_on_scheduled_at", where: "((status)::text = 'scheduled'::text)"
+    t.check_constraint "status::text <> 'published'::text OR published_at IS NOT NULL", name: "posts_published_requires_published_at"
+    t.check_constraint "status::text <> 'scheduled'::text OR scheduled_at IS NOT NULL", name: "posts_scheduled_requires_scheduled_at"
+    t.check_constraint "status::text = ANY (ARRAY['draft'::character varying, 'scheduled'::character varying, 'published'::character varying]::text[])", name: "posts_status_valid"
   end
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "comments", "posts"
+  add_foreign_key "post_notifications", "followers"
+  add_foreign_key "post_notifications", "posts"
   add_foreign_key "posts", "categories"
 end

@@ -70,6 +70,81 @@ class PostTest < ActiveSupport::TestCase
     assert post.errors.added?(:cover, :file_too_large, size: "5 เมกะไบต์")
   end
 
+  test "new post starts as draft" do
+    assert build_post.draft?
+  end
+
+  test "scheduled post requires scheduled_at" do
+    post = build_post(status: :scheduled)
+
+    assert_not post.valid?
+    assert post.errors.added?(:scheduled_at, :blank)
+  end
+
+  test "cannot schedule in the past but can pick the current minute" do
+    freeze_time do
+      assert_not build_post(status: :scheduled, scheduled_at: 1.minute.ago.beginning_of_minute).valid?
+      assert build_post(status: :scheduled, scheduled_at: Time.current.beginning_of_minute).valid?
+    end
+  end
+
+  test "cannot become published without published_at (only publish_if_due! publishes)" do
+    post = posts(:one)
+    post.update_columns(status: "draft", published_at: nil)
+
+    assert_not post.update(status: :published)
+    assert post.errors.added?(:published_at, :blank)
+  end
+
+  test "unknown status is a validation error, not an exception" do
+    post = build_post(status: "archived")
+
+    assert_not post.valid?
+    assert post.errors.added?(:status, :inclusion, value: "archived")
+  end
+
+  test "publish_if_due! only publishes a scheduled post whose time has come, once" do
+    post = build_post(status: :scheduled, scheduled_at: 5.minutes.from_now)
+    post.save!
+
+    assert_not post.publish_if_due!
+    assert post.reload.scheduled?
+
+    # travel ตัดเศษ microsecond ทิ้ง จึงเผื่อเกินเวลาที่ตั้งไว้ไป 1 นาที
+    travel 6.minutes do
+      assert post.publish_if_due!
+      assert post.reload.published?
+      assert_equal Time.current, post.published_at
+
+      assert_not post.publish_if_due!, "รอบที่สองต้องไม่เปลี่ยนอะไร"
+    end
+  end
+
+  test "publish_if_due! leaves drafts alone" do
+    post = build_post
+    post.save!
+
+    assert_not post.publish_if_due!
+    assert post.reload.draft?
+  end
+
+  test "due_for_publishing finds only scheduled posts whose time has passed" do
+    due = build_post(status: :scheduled, scheduled_at: 1.minute.from_now).tap(&:save!)
+    later = build_post(status: :scheduled, scheduled_at: 1.hour.from_now).tap(&:save!)
+
+    travel 2.minutes do
+      assert_includes Post.due_for_publishing, due
+      assert_not_includes Post.due_for_publishing, later
+      assert_not_includes Post.due_for_publishing, posts(:one)
+    end
+  end
+
+  test "check constraint rejects scheduled without scheduled_at at the DB level" do
+    assert_raises(ActiveRecord::StatementInvalid) do
+      posts(:one).update_columns(status: "scheduled", scheduled_at: nil)
+    end
+  end
+
   private
     def build_post(**attributes)
       Post.new(title: "ทดสอบ", body: "<div>เนื้อหา</div>", category: categories(:one), **attributes)

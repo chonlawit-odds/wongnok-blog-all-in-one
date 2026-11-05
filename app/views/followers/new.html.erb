@@ -1,0 +1,11 @@
+<% content_for :title, t(".title") %>
+
+<div class="w-full max-w-xl mx-auto">
+  <h1 class="text-3xl font-bold mb-6"><%= t(".title") %></h1>
+
+  <%= render "form", follower: @follower %>
+
+  <div class="mt-4">
+    <%= link_to t(".back"), posts_path, class: "btn btn-ghost" %>
+  </div>
+</div>

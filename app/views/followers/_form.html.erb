@@ -1,0 +1,26 @@
+<%# locals: (follower:) -%>
+<%= form_with model: follower, class: "card bg-base-100 text-base-content border border-base-300" do |form| %>
+  <div class="card-body gap-3">
+    <h2 class="card-title text-lg"><%= t(".title") %></h2>
+    <p class="text-sm text-base-content/60"><%= t(".description") %></p>
+
+    <% if follower.errors.any? %>
+      <div role="alert" class="alert alert-error alert-soft flex-col items-start">
+        <p class="font-medium"><%= t(".error_header", count: follower.errors.count) %></p>
+        <ul class="list-disc ml-6">
+          <% follower.errors.each do |error| %>
+            <li><%= error.full_message %></li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+
+    <div class="join w-full">
+      <%= form.label :email, class: "sr-only" %>
+      <%= form.email_field :email, required: true, autocomplete: "email", maxlength: Follower::EMAIL_MAX_LENGTH,
+            placeholder: t(".email_placeholder"),
+            class: ["input join-item w-full", { "input-error": follower.errors[:email].any? }] %>
+      <%= form.submit t(".submit"), class: "btn btn-primary join-item" %>
+    </div>
+  </div>
+<% end %>
