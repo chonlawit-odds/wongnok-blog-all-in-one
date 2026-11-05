@@ -84,6 +84,29 @@ class PostsControllerTest < ActionDispatch::IntegrationTest
     assert_select "input[type=file][name='post[cover]'][data-direct-upload-url]"
   end
 
+  test "new shows category dropdown with prompt and all categories" do
+    get new_post_url
+    assert_select "select[name='post[category_id]']" do
+      assert_select "option[value='']", I18n.t("posts.form.category_prompt")
+      assert_select "option[value='#{categories(:one).id}']", categories(:one).name
+      assert_select "option[value='#{categories(:two).id}']", categories(:two).name
+    end
+  end
+
+  test "edit preselects the current category" do
+    get edit_post_url(@post)
+    assert_select "select[name='post[category_id]'] option[selected][value='#{@post.category_id}']"
+  end
+
+  test "create without a category re-renders form with dropdown in error state" do
+    assert_no_difference("Post.count") do
+      post posts_url, params: { post: { category_id: "", body: "<div>เนื้อหา</div>", title: "ไม่มีหมวดหมู่" } }
+    end
+
+    assert_response :unprocessable_content
+    assert_select "select.select-error[name='post[category_id]']"
+  end
+
   test "should create post" do
     assert_difference("Post.count") do
       post posts_url, params: { post: { category_id: @post.category_id, body: "<div><strong>เนื้อหา</strong></div>", title: @post.title } }

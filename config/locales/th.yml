@@ -77,6 +77,7 @@ th:
       edit_title: แก้ไขหัวข้อ
     form:
       cover_hint: "ไฟล์ PNG, JPEG หรือ WebP ขนาดไม่เกิน %{size}"
+      category_prompt: เลือกหมวดหมู่
   comments:
     comment:
       posted_ago: "%{time}ที่แล้ว"

@@ -1,6 +1,7 @@
 class PostsController < ApplicationController
   before_action :set_post, only: %i[ show edit update destroy ]
   before_action :set_turbo_frame_variant, only: %i[ edit update ]
+  before_action :set_categories, only: %i[ new edit create update ]
 
   # GET /posts or /posts.json
   # ข้อความย่อใช้คอลัมน์ plain_text จึงไม่ต้องโหลด rich text ของทุกโพสต์มาที่หน้านี้
@@ -71,6 +72,12 @@ class PostsController < ApplicationController
     # เปิด /posts/:id/edit ตรง ๆ ไม่มี header Turbo-Frame -> edit.html.erb หน้าเต็มเหมือนเดิม
     def set_turbo_frame_variant
       request.variant = :turbo_frame if turbo_frame_request?
+    end
+
+    # ตัวเลือกใน dropdown หมวดหมู่ของฟอร์ม เป็น relation แบบ lazy จะ query เฉพาะตอน render ฟอร์มเต็มจริง
+    # (create/update ที่ redirect หรือฟอร์มแก้หัวข้อแบบ inline ไม่ได้ใช้ จึงไม่เสีย query)
+    def set_categories
+      @categories = Category.alphabetical
     end
 
     # Only allow a list of trusted parameters through.
