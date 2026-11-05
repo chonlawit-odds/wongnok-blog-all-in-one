@@ -81,5 +81,8 @@ Rails.application.configure do
     Bullet.enable = true
     Bullet.rails_logger = true
     Bullet.add_footer = true
+    # with_rich_text_body ของ Action Text ใช้ชื่อ association เป็น string แต่ Bullet นับการใช้เป็น symbol
+    # จึงเตือน AVOID eager loading ทั้งที่ใช้จริง (false positive) — ห้ามลบ with_rich_text_body ตามคำแนะนำ
+    Bullet.add_safelist type: :unused_eager_loading, class_name: "Post", association: :rich_text_body
   end
 end

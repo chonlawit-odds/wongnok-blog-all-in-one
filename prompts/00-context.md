@@ -52,6 +52,7 @@
 13. turbo-frame id ใช้ dom_id() ทั้งสองฝั่ง ห้าม hardcode เป็น string
 14. render ใหม่หลัง validation ไม่ผ่าน ต้องมี status: :unprocessable_content และใช้ after_commit ไม่ใช่ after_save เมื่อต้องยิงงานต่อ
 15. association ที่เป็น attachment หรือ rich text ต้องมี with_attached_*/with_rich_text_* ใน controller
+    Bullet เตือน AVOID eager loading `"rich_text_*"` = false positive ห้ามลบ ให้ add_safelist ใน development.rb
 16. validate ไฟล์จากเนื้อไฟล์จริง ไม่เชื่อ content_type ที่ client ส่งมา และห้ามตั้ง bucket เป็น public — ใช้ signed URL เสมอ
 
 ## รูปแบบการตอบ
