@@ -77,3 +77,6 @@ gem "pagy", "~> 43.5"
 gem "rails-i18n", "~> 8.1"
 
 gem "aws-sdk-s3", "~> 1.238", require: false
+
+gem "omniauth-keycloak", "~> 1.5"
+gem "omniauth-rails_csrf_protection", "~> 2.0"

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_06_115652) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_06_130006) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -66,7 +66,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_06_115652) do
     t.text "body", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "user_id"
     t.index ["post_id", "created_at"], name: "index_comments_on_post_id_and_created_at"
+    t.index ["user_id"], name: "index_comments_on_user_id"
   end
 
   create_table "followers", force: :cascade do |t|
@@ -97,19 +99,35 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_06_115652) do
     t.datetime "scheduled_at"
     t.datetime "published_at"
     t.integer "comments_count", default: 0, null: false
+    t.bigint "user_id"
     t.index ["category_id"], name: "index_posts_on_category_id"
     t.index ["created_at"], name: "index_posts_on_created_at"
     t.index ["published_at"], name: "index_posts_on_published_at", where: "((status)::text = 'published'::text)"
     t.index ["scheduled_at"], name: "index_posts_on_scheduled_at", where: "((status)::text = 'scheduled'::text)"
+    t.index ["user_id"], name: "index_posts_on_user_id"
     t.check_constraint "status::text <> 'published'::text OR published_at IS NOT NULL", name: "posts_published_requires_published_at"
     t.check_constraint "status::text <> 'scheduled'::text OR scheduled_at IS NOT NULL", name: "posts_scheduled_requires_scheduled_at"
     t.check_constraint "status::text = ANY (ARRAY['draft'::character varying, 'scheduled'::character varying, 'published'::character varying]::text[])", name: "posts_status_valid"
   end
 
+  create_table "users", force: :cascade do |t|
+    t.string "keycloak_sub"
+    t.string "name", null: false
+    t.string "email"
+    t.string "role", default: "author", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["keycloak_sub"], name: "index_users_on_keycloak_sub", unique: true
+    t.index ["name"], name: "index_users_on_name_without_keycloak_sub", unique: true, where: "(keycloak_sub IS NULL)"
+    t.check_constraint "role::text = ANY (ARRAY['author'::character varying, 'admin'::character varying]::text[])", name: "users_role_valid"
+  end
+
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "comments", "posts"
+  add_foreign_key "comments", "users"
   add_foreign_key "post_notifications", "followers"
   add_foreign_key "post_notifications", "posts"
   add_foreign_key "posts", "categories"
+  add_foreign_key "posts", "users"
 end

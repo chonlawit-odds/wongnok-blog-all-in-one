@@ -1,0 +1,4 @@
+<%# locals: (label:, button_class: "btn btn-primary") -%>
+<%# POST /auth/keycloak พร้อม CSRF token (omniauth-rails_csrf_protection ไม่รับ GET)
+    ปิด Turbo: คำตอบคือ redirect ไปหน้า login ของ Keycloak (คนละ origin) ต้องให้เบราว์เซอร์ไปเอง %>
+<%= button_to label, "/auth/keycloak", class: button_class, form: { data: { turbo: false } } %>

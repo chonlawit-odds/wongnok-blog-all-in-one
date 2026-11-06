@@ -1,5 +1,8 @@
 class PostsController < ApplicationController
-  before_action :set_post, only: %i[ show edit update destroy ]
+  # อ่านได้ทุกคน  เขียน/แก้/ลบ ต้อง login (ก่อน set_editable_post: ยังไม่ login = ไปหน้า login ไม่ใช่ 404)
+  before_action :require_login, except: %i[ index show ]
+  before_action :set_post, only: :show
+  before_action :set_editable_post, only: %i[ edit update destroy ]
   before_action :set_turbo_frame_variant, only: %i[ edit update ]
   before_action :set_categories, only: %i[ new edit create update ]
 
@@ -16,13 +19,13 @@ class PostsController < ApplicationController
 
   # GET /posts/1 or /posts/1.json
   def show
-    @comments = @post.comments.chronological
+    @comments = @post.comments.includes(:user).chronological
     @comment = Comment.new
   end
 
   # GET /posts/new
   def new
-    @post = Post.new
+    @post = current_user.posts.build
   end
 
   # GET /posts/1/edit
@@ -30,8 +33,9 @@ class PostsController < ApplicationController
   end
 
   # POST /posts or /posts.json
+  # เจ้าของ = คนที่ login อยู่เสมอ (user_id ไม่อยู่ใน post_params ส่งมาก็ไม่รับ)
   def create
-    @post = Post.new(post_params)
+    @post = current_user.posts.build(post_params)
 
     respond_to do |format|
       if @post.save
@@ -71,6 +75,12 @@ class PostsController < ApplicationController
     # Use callbacks to share common setup or constraints between actions.
     def set_post
       @post = Post.with_rich_text_body.with_attached_cover.find(params.expect(:id))
+    end
+
+    # แก้/ลบได้เฉพาะโพสต์ใน PostPolicy.scope: author = current_user.posts  admin = ทุกโพสต์
+    # ไม่ใช่ของตัวเอง = RecordNotFound -> 404 (ไม่ใช่ 403)  ก่อน update/destroy จึงไม่มีทางแตะโพสต์คนอื่น
+    def set_editable_post
+      @post = PostPolicy.scope(current_user).with_rich_text_body.with_attached_cover.find(params.expect(:id))
     end
 
     # แก้หัวข้อแบบ inline จาก turbo-frame ในหน้า show -> edit.html+turbo_frame.erb (ฟอร์มเฉพาะหัวข้อ)

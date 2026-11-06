@@ -1,4 +1,6 @@
 <% content_for :title, @post.title %>
+<%# ซ่อนปุ่มแก้/ลบ/เผยแพร่ตาม PostPolicy เป็นแค่ UX  ด่านจริงคือ PostPolicy.scope ใน controller (ไม่ใช่เจ้าของ = 404) %>
+<% can_manage = PostPolicy.new(current_user, @post).update? %>
 
 <div class="w-full max-w-3xl mx-auto">
   <%# รับ broadcast ของโพสต์นี้ (comment ใหม่ + ตัวนับ) ผ่าน Action Cable %>
@@ -25,8 +27,10 @@
         <% end %>
       </span>
       <%# เข้าคิว PublishPostJob (Posts::PublicationsController) ไม่ได้เผยแพร่ใน request นี้ %>
-      <%= button_to t(".publish_now"), post_publication_path(@post), class: "btn btn-primary btn-sm",
-            data: { turbo_confirm: t(".confirm_publish_now") } %>
+      <% if can_manage %>
+        <%= button_to t(".publish_now"), post_publication_path(@post), class: "btn btn-primary btn-sm",
+              data: { turbo_confirm: t(".confirm_publish_now") } %>
+      <% end %>
     </div>
   <% end %>
 
@@ -62,11 +66,13 @@
         <%= turbo_frame_tag @post, :title, class: "block" do %>
           <div class="flex items-start justify-between gap-3">
             <h1 class="text-3xl sm:text-4xl font-bold leading-tight tracking-tight"><%= @post.title %></h1>
-            <%= link_to edit_post_path(@post), class: "btn btn-ghost btn-sm btn-square shrink-0",
-                  title: t(".edit_title"), aria: { label: t(".edit_title") } do %>
-              <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125" />
-              </svg>
+            <% if can_manage %>
+              <%= link_to edit_post_path(@post), class: "btn btn-ghost btn-sm btn-square shrink-0",
+                    title: t(".edit_title"), aria: { label: t(".edit_title") } do %>
+                <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125" />
+                </svg>
+              <% end %>
             <% end %>
           </div>
         <% end %>
@@ -86,11 +92,13 @@
       </svg>
       <%= t(".back") %>
     <% end %>
-    <div class="ml-auto flex flex-wrap gap-2">
-      <%= link_to t(".edit"), edit_post_path(@post), class: "btn btn-outline" %>
-      <%= button_to t(".destroy"), @post, method: :delete, class: "btn btn-error btn-outline",
-            data: { turbo_confirm: t(".confirm_destroy") } %>
-    </div>
+    <% if can_manage %>
+      <div class="ml-auto flex flex-wrap gap-2">
+        <%= link_to t(".edit"), edit_post_path(@post), class: "btn btn-outline" %>
+        <%= button_to t(".destroy"), @post, method: :delete, class: "btn btn-error btn-outline",
+              data: { turbo_confirm: t(".confirm_destroy") } %>
+      </div>
+    <% end %>
   </div>
 
   <section class="mt-12">
@@ -101,9 +109,18 @@
     <div id="<%= dom_id(@post, :comments) %>" class="flex flex-col gap-3 mb-6">
       <%# โชว์เฉพาะตอนไม่มี comment: only:block = เป็นลูกตัวเดียวใน list %>
       <p class="hidden only:block rounded-box border border-dashed border-base-300 text-center text-base-content/60 py-8"><%= t(".no_comments") %></p>
-      <%= render @comments %>
+      <%= render partial: "comments/comment", collection: @comments, locals: { viewer: current_user } %>
     </div>
 
-    <%= render "comments/form", post: @post, comment: @comment %>
+    <% if current_user %>
+      <%= render "comments/form", post: @post, comment: @comment, user: current_user %>
+    <% else %>
+      <div class="card bg-base-100 text-base-content border border-base-300">
+        <div class="card-body flex-row flex-wrap items-center justify-between gap-3">
+          <p class="text-base-content/70"><%= t(".login_to_comment") %></p>
+          <%= render "sessions/login_button", label: t(".login"), button_class: "btn btn-primary btn-sm" %>
+        </div>
+      </div>
+    <% end %>
   </section>
 </div>

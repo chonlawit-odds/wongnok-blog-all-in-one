@@ -5,7 +5,8 @@ class Posts::PublicationsControllerTest < ActionDispatch::IntegrationTest
   include ActionMailer::TestHelper
 
   setup do
-    @draft = Post.create!(title: "ฉบับร่าง", body: "<div>เนื้อหา</div>", category: categories(:one))
+    @draft = Post.create!(title: "ฉบับร่าง", body: "<div>เนื้อหา</div>", category: categories(:one), user: users(:somchai))
+    sign_in_as users(:somchai)
   end
 
   test "publish now schedules for now and enqueues PublishPostJob with the id only" do
@@ -28,6 +29,17 @@ class Posts::PublicationsControllerTest < ActionDispatch::IntegrationTest
     perform_enqueued_jobs only: PublishPostJob
     assert @draft.reload.published?
     assert_enqueued_emails Follower.count
+  end
+
+  test "another author cannot publish someone else's post (404, nothing queued)" do
+    sign_in_as users(:malee)
+
+    assert_no_enqueued_jobs only: PublishPostJob do
+      post post_publication_url(@draft)
+    end
+
+    assert_response :not_found
+    assert @draft.reload.draft?
   end
 
   test "an already published post is not queued again" do

@@ -1,0 +1,3 @@
+<%# แท็บที่กดลบ: เห็นผลทันทีไม่ต้องรอ broadcast (แท็บอื่นได้ remove + ตัวนับจาก broadcast ของ Comment) %>
+<%= turbo_stream.remove @comment %>
+<%= turbo_stream.update dom_id(@post, :comments_count), partial: "comments/count", locals: { post: @post } %>

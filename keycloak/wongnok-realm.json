@@ -1,0 +1,85 @@
+{
+  "realm": "wongnok",
+  "displayName": "Wongnok Blog",
+  "enabled": true,
+  "sslRequired": "none",
+  "registrationAllowed": false,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "resetPasswordAllowed": false,
+  "editUsernameAllowed": false,
+  "verifyEmail": false,
+  "accessTokenLifespan": 300,
+  "ssoSessionIdleTimeout": 1800,
+  "ssoSessionMaxLifespan": 36000,
+  "roles": {
+    "realm": [
+      { "name": "author", "description": "เขียนและแก้โพสต์ของตัวเองได้" },
+      { "name": "admin", "description": "แก้และลบโพสต์ของทุกคนได้" }
+    ]
+  },
+  "defaultRoles": ["author"],
+  "clients": [
+    {
+      "clientId": "wongnok-blog",
+      "name": "Wongnok Blog",
+      "description": "Rails app (confidential client, authorization code flow)",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "bearerOnly": false,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false,
+      "frontchannelLogout": true,
+      "secret": "wongnok-dev-secret",
+      "redirectUris": [
+        "http://localhost:3000/auth/keycloak/callback",
+        "http://127.0.0.1:3000/auth/keycloak/callback"
+      ],
+      "webOrigins": ["http://localhost:3000"],
+      "attributes": {
+        "post.logout.redirect.uris": "http://localhost:3000/*"
+      }
+    }
+  ],
+  "users": [
+    {
+      "username": "somchai",
+      "email": "somchai@wongnok.test",
+      "firstName": "Somchai",
+      "lastName": "Jaidee",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        { "type": "password", "value": "password", "temporary": false }
+      ],
+      "realmRoles": ["author"]
+    },
+    {
+      "username": "malee",
+      "email": "malee@wongnok.test",
+      "firstName": "Malee",
+      "lastName": "Sooksai",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        { "type": "password", "value": "password", "temporary": false }
+      ],
+      "realmRoles": ["author"]
+    },
+    {
+      "username": "boss",
+      "email": "boss@wongnok.test",
+      "firstName": "Boss",
+      "lastName": "Admin",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        { "type": "password", "value": "password", "temporary": false }
+      ],
+      "realmRoles": ["author", "admin"]
+    }
+  ]
+}

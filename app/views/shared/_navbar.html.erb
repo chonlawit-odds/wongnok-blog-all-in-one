@@ -1,4 +1,5 @@
-<%# locals: () -%>
+<%# locals: (user:) -%>
+<%# user = current_user (nil = ยังไม่ login) ส่งเข้ามาเป็น local  การซ่อนปุ่มในนี้เป็นแค่ UX ด่านจริงอยู่ที่ controller %>
 <header class="navbar sticky top-0 z-30 bg-base-100 text-base-content border-b border-base-300 shadow-sm px-2 sm:px-4">
   <div class="navbar-start">
     <%# เมนูบนมือถือ: dropdown ของ daisyUI เปิด/ปิดด้วย focus ไม่ต้องใช้ JS %>
@@ -11,7 +12,9 @@
       <ul tabindex="-1" class="menu dropdown-content z-10 mt-3 w-52 rounded-box border border-base-300 bg-base-100 p-2 shadow-lg">
         <li><%= link_to t(".posts"), posts_path, class: class_names("menu-active": controller_name == "posts") %></li>
         <li><%= link_to t(".categories"), categories_path, class: class_names("menu-active": controller_name == "categories") %></li>
-        <li><%= link_to t(".new_post"), new_post_path %></li>
+        <% if user %>
+          <li><%= link_to t(".new_post"), new_post_path %></li>
+        <% end %>
       </ul>
     </div>
 
@@ -26,7 +29,20 @@
   </nav>
 
   <div class="navbar-end gap-2">
-    <%= link_to t(".new_post"), new_post_path, class: "btn btn-primary btn-sm hidden sm:inline-flex" %>
+    <% if user %>
+      <%= link_to t(".new_post"), new_post_path, class: "btn btn-primary btn-sm hidden sm:inline-flex" %>
+      <span class="hidden md:inline-flex items-center gap-2 text-sm">
+        <span class="font-medium"><%= user.name %></span>
+        <% if user.admin? %>
+          <span class="badge badge-secondary badge-soft badge-sm"><%= User.human_attribute_name("role.admin") %></span>
+        <% end %>
+      </span>
+      <%# ออกไปหน้า logout ของ Keycloak (คนละ origin) จึงปิด Turbo ให้เบราว์เซอร์ส่งฟอร์มเอง %>
+      <%= button_to t(".logout"), session_path, method: :delete, class: "btn btn-ghost btn-sm",
+            form: { data: { turbo: false } } %>
+    <% else %>
+      <%= render "sessions/login_button", label: t(".login"), button_class: "btn btn-primary btn-sm" %>
+    <% end %>
 
     <%# ปุ่มสลับธีม: ติ๊ก = dark  logic อยู่ที่ app/javascript/controllers/theme_controller.js %>
     <label class="btn btn-ghost btn-circle swap swap-rotate" title="<%= t(".toggle_theme") %>" data-controller="theme">

@@ -1,4 +1,5 @@
 class Posts::PublicationsController < ApplicationController
+  before_action :require_login
   before_action :set_post
 
   # POST /posts/:post_id/publication
@@ -17,7 +18,8 @@ class Posts::PublicationsController < ApplicationController
   end
 
   private
+    # เผยแพร่ = แก้โพสต์: เจ้าของหรือ admin เท่านั้น ไม่ใช่ของตัวเอง = 404
     def set_post
-      @post = Post.find(params.expect(:post_id))
+      @post = PostPolicy.scope(current_user).find(params.expect(:post_id))
     end
 end

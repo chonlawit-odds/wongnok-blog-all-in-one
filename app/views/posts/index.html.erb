@@ -16,11 +16,14 @@
         <h1 class="mt-2 text-4xl sm:text-5xl font-bold tracking-tight"><%= t(".title") %></h1>
         <p class="mt-3 text-base-content/70 leading-relaxed"><%= t(".tagline") %></p>
       </div>
-      <%= link_to new_post_path, class: "btn btn-primary shrink-0 self-start sm:self-auto" do %>
-        <svg xmlns="http://www.w3.org/2000/svg" class="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14m-7-7h14" />
-        </svg>
-        <%= t(".new_post") %>
+      <%# อยู่นอกกล่อง cache: โชว์ตามคนที่ login (ซ่อนปุ่มเป็นแค่ UX PostsController#new ต้อง login อยู่แล้ว) %>
+      <% if current_user %>
+        <%= link_to new_post_path, class: "btn btn-primary shrink-0 self-start sm:self-auto" do %>
+          <svg xmlns="http://www.w3.org/2000/svg" class="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14m-7-7h14" />
+          </svg>
+          <%= t(".new_post") %>
+        <% end %>
       <% end %>
     </div>
   </section>

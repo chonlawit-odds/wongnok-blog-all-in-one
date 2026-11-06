@@ -1,0 +1,20 @@
+<% content_for :title, t(".title") %>
+
+<div class="w-full max-w-md mx-auto">
+  <% if alert.present? %>
+    <div role="alert" class="alert alert-warning alert-soft mb-6"><%= alert %></div>
+  <% end %>
+  <% if notice.present? %>
+    <div role="status" class="alert alert-success alert-soft mb-6"><%= notice %></div>
+  <% end %>
+
+  <section class="card bg-base-100 text-base-content border border-base-300 shadow-sm">
+    <div class="card-body gap-4 text-center">
+      <h1 class="text-2xl font-bold"><%= t(".title") %></h1>
+      <p class="text-base-content/70"><%= t(".description") %></p>
+      <div class="card-actions justify-center">
+        <%= render "sessions/login_button", label: t(".submit"), button_class: "btn btn-primary" %>
+      </div>
+    </div>
+  </section>
+</div>

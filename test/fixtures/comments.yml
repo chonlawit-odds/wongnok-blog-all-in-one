@@ -1,11 +1,14 @@
 one:
   post: one
-  author_name: สมชาย
+  user: somchai
+  author_name: Somchai Jaidee
   body: บทความดีมากครับ
   created_at: <%= 2.hours.ago %>
 
+# comment เดิมก่อนมีระบบ login: เจ้าของคือผู้ใช้เดิม (ชื่อเดียวกับ author_name)
 two:
   post: one
+  user: somying
   author_name: สมหญิง
   body: ขอบคุณที่แบ่งปันค่ะ
   created_at: <%= 1.hour.ago %>

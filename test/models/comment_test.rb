@@ -74,6 +74,39 @@ class CommentTest < ActiveSupport::TestCase
     end
   end
 
+  test "author_label reads both ways: the user's name first, author_name when there is no user yet" do
+    assert_equal "Somchai Jaidee", comments(:one).author_label
+    assert_equal "สมหญิง", comments(:two).author_label
+
+    comment = @post.comments.build(author_name: "ยังไม่ backfill", body: "x")
+    assert_equal "ยังไม่ backfill", comment.author_label
+  end
+
+  test "a new comment with a user also writes author_name (expand: both columns)" do
+    comment = @post.comments.create!(user: users(:malee), body: "สวัสดี")
+
+    assert_equal "Malee Sooksai", comment.author_name
+  end
+
+  test "author_name copied from a long user name still fits the column limit" do
+    users(:malee).update!(name: "ม" * 80)
+    comment = @post.comments.create!(user: users(:malee), body: "สวัสดี")
+
+    assert_equal Comment::AUTHOR_NAME_MAX_LENGTH, comment.author_name.length
+  end
+
+  test "destroying broadcasts remove and an updated counter" do
+    comment = comments(:one)
+
+    streams = capture_turbo_stream_broadcasts(@post) do
+      perform_enqueued_jobs { comment.destroy! }
+    end
+
+    actions = streams.to_h { |stream| [ stream["action"], stream["target"] ] }
+    assert_equal dom_id(comment), actions["remove"]
+    assert_equal dom_id(@post, :comments_count), actions["update"]
+  end
+
   test "deleting a post deletes its comments" do
     assert_difference("Comment.count", -@post.comments.count) do
       @post.destroy!

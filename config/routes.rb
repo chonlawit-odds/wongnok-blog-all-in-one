@@ -1,6 +1,11 @@
 Rails.application.routes.draw do
+  # login ด้วย Keycloak: POST /auth/keycloak ถูก OmniAuth middleware รับไปก่อนถึง routes (ไม่ต้องประกาศ)
+  resource :session, only: %i[ new destroy ]
+  get "auth/keycloak/callback", to: "sessions#create", as: :keycloak_callback
+  get "auth/failure", to: "sessions#failure", as: :auth_failure
+
   resources :posts do
-    resources :comments, only: :create
+    resources :comments, only: %i[ create destroy ]
     # ปุ่ม "เผยแพร่ทันที": POST /posts/:post_id/publication -> Posts::PublicationsController#create
     resource :publication, only: :create, module: :posts
   end

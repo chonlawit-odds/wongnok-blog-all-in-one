@@ -5,6 +5,10 @@ class Post < ApplicationRecord
   COVER_HEADER_SIZE = 4.kilobytes
 
   belongs_to :category
+  # เจ้าของ (คนเขียน) ใช้ตัดสินสิทธิ์แก้/ลบ ใน PostPolicy
+  # optional: โพสต์เดิมก่อนมีระบบ login ยังไม่มีเจ้าของ (NULL ใน DB = แก้ได้เฉพาะ admin)
+  # โพสต์ใหม่สร้างผ่าน current_user.posts จึงมีเจ้าของเสมอ  รอบหน้า NOT NULL แล้วค่อยเอา optional ออก
+  belongs_to :user, optional: true
   # ลบโพสต์ = comment หมดความหมาย ลบตามด้วย SQL เดียว
   # (comment ไม่มีของที่ต้องเก็บกวาดต่อ และหน้าโพสต์หายไปแล้ว ไม่ต้อง broadcast ลบทีละอัน)
   has_many :comments, dependent: :delete_all

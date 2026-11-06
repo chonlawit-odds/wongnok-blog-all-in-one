@@ -1,6 +1,7 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 # body อยู่ใน test/fixtures/action_text/rich_texts.yml  description ยังเก็บไว้ช่วง expand-contract
 # ทั้งสองโพสต์เผยแพร่แล้ว (โผล่ในหน้ารายการ)  ฉบับร่าง/ตั้งเวลา สร้างในแต่ละ test เอง
+# one เป็นของ somchai  two เป็นของ malee
 # fixture insert ตรงเข้า DB ไม่ผ่าน counter_cache: comments_count ต้องตรงกับ comments.yml เอง
 
 one:
@@ -8,6 +9,7 @@ one:
   description: MyText
   plain_text: MyText
   category: one
+  user: somchai
   status: published
   published_at: <%= 1.day.ago %>
   comments_count: 2
@@ -17,5 +19,6 @@ two:
   description: MyText
   plain_text: MyText
   category: two
+  user: malee
   status: published
   published_at: <%= 2.days.ago %>

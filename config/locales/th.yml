@@ -9,6 +9,7 @@ th:
       comment: ความคิดเห็น
       follower: ผู้ติดตาม
       post: บทความ
+      user: ผู้ใช้
     attributes:
       post:
         title: หัวข้อ
@@ -32,6 +33,14 @@ th:
       comment:
         author_name: ชื่อผู้แสดงความคิดเห็น
         body: ความคิดเห็น
+        user: ผู้แสดงความคิดเห็น
+      user:
+        name: ชื่อ
+        email: อีเมล
+        role: บทบาท
+      user/role:
+        author: ผู้เขียน
+        admin: ผู้ดูแล
     errors:
       models:
         post:
@@ -98,6 +107,8 @@ th:
       destroy: ลบบทความ
       confirm_destroy: ยืนยันที่จะลบบทความนี้?
       no_comments: ยังไม่มีความคิดเห็น มาเป็นคนแรกกันเลย
+      login_to_comment: เข้าสู่ระบบเพื่อแสดงความคิดเห็น
+      login: เข้าสู่ระบบ
       draft_notice: บทความนี้ยังเป็นฉบับร่าง ผู้อ่านยังไม่เห็น
       scheduled_notice: "ตั้งเวลาเผยแพร่ไว้ %{time}"
       publish_now: เผยแพร่ทันที
@@ -145,15 +156,33 @@ th:
   comments:
     comment:
       posted_ago: "%{time}ที่แล้ว"
+      destroy: ลบ
+      confirm_destroy: ยืนยันที่จะลบความคิดเห็นนี้?
     count:
       title: "ความคิดเห็น (%{count})"
     form:
       title: แสดงความคิดเห็น
+      signed_in_as: "ในชื่อ %{name}"
       body_placeholder: เขียนความคิดเห็นของคุณ...
       submit: ส่งความคิดเห็น
       error_header: "ส่งความคิดเห็นไม่ได้ มีข้อผิดพลาด %{count} รายการ:"
     create:
       success: เพิ่มความคิดเห็นเรียบร้อยแล้ว
+    destroy:
+      success: ลบความคิดเห็นแล้ว
+  sessions:
+    required: กรุณาเข้าสู่ระบบก่อน
+    new:
+      title: เข้าสู่ระบบ
+      description: ใช้บัญชี Wongnok เพื่อเขียนบทความและแสดงความคิดเห็น
+      submit: เข้าสู่ระบบด้วย Keycloak
+    create:
+      success: "ยินดีต้อนรับ %{name}"
+      rate_limited: พยายามเข้าสู่ระบบบ่อยเกินไป กรุณารอสักครู่แล้วลองใหม่
+    failure:
+      message: เข้าสู่ระบบไม่สำเร็จ กรุณาลองใหม่อีกครั้ง
+    destroy:
+      success: ออกจากระบบแล้ว
   shared:
     navbar:
       brand: Wongnok Blog
@@ -163,6 +192,8 @@ th:
       categories: หมวดหมู่
       new_post: เขียนบทความ
       toggle_theme: สลับธีมสว่าง/มืด
+      login: เข้าสู่ระบบ
+      logout: ออกจากระบบ
     pagination:
       label: เปลี่ยนหน้า
       previous: "« ก่อนหน้า"

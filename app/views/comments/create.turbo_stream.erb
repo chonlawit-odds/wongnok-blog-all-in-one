@@ -2,4 +2,4 @@
     (broadcast ที่ตามมาจะ append id เดิม Turbo จะลบตัวซ้ำออกก่อน จึงไม่เบิ้ล) %>
 <%= turbo_stream.append dom_id(@post, :comments), @comment %>
 <%= turbo_stream.update dom_id(@post, :comments_count), partial: "comments/count", locals: { post: @post } %>
-<%= turbo_stream.replace dom_id(@post, :new_comment), partial: "comments/form", locals: { post: @post, comment: Comment.new } %>
+<%= turbo_stream.replace dom_id(@post, :new_comment), partial: "comments/form", locals: { post: @post, comment: Comment.new, user: current_user } %>

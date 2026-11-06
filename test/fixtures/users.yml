@@ -1,0 +1,23 @@
+# keycloak_sub = sub ของ Keycloak (ตัวตนจริง) role ตาม realm role
+somchai:
+  keycloak_sub: 6f1d3a3e-0c4e-4b8e-9d47-000000000001
+  name: Somchai Jaidee
+  email: somchai@wongnok.test
+  role: author
+
+malee:
+  keycloak_sub: 6f1d3a3e-0c4e-4b8e-9d47-000000000002
+  name: Malee Sooksai
+  email: malee@wongnok.test
+  role: author
+
+boss:
+  keycloak_sub: 6f1d3a3e-0c4e-4b8e-9d47-000000000003
+  name: Boss Admin
+  email: boss@wongnok.test
+  role: admin
+
+# ผู้ใช้เดิมที่ backfill สร้างจาก comments.author_name: ไม่มีบัญชี Keycloak (keycloak_sub = NULL)
+somying:
+  name: สมหญิง
+  role: author
