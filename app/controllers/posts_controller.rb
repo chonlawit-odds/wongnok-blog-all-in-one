@@ -6,10 +6,11 @@ class PostsController < ApplicationController
   # GET /posts or /posts.json
   # ข้อความย่อใช้คอลัมน์ plain_text จึงไม่ต้องโหลด rich text ของทุกโพสต์มาที่หน้านี้
   # ปกติโชว์เฉพาะที่เผยแพร่แล้ว  ?view=pending = ฉบับร่าง + ที่ตั้งเวลาไว้ (ไว้ให้ผู้เขียนกลับไปแก้)
+  # @posts_scope = ทั้งรายการก่อนแบ่งหน้า ใช้เป็น key ของ cache ชั้นนอกใน index.html.erb
   def index
     @pending = params[:view] == "pending"
-    posts = @pending ? Post.not_published.recent : Post.latest_published
-    @pagy, @posts = pagy(posts.includes(:category).with_attached_cover, limit: 10)
+    @posts_scope = @pending ? Post.not_published.recent : Post.latest_published
+    @pagy, @posts = pagy(@posts_scope.includes(:category).with_attached_cover, limit: 10)
     @follower = Follower.new
   end
 

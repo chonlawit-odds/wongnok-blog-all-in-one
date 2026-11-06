@@ -15,18 +15,16 @@ Rails.application.configure do
   # Enable server timing.
   config.server_timing = true
 
-  # Enable/disable Action Controller caching. By default Action Controller caching is disabled.
-  # Run rails dev:cache to toggle Action Controller caching.
-  if Rails.root.join("tmp/caching-dev.txt").exist?
-    config.action_controller.perform_caching = true
-    config.action_controller.enable_fragment_cache_logging = true
-    config.public_file_server.headers = { "cache-control" => "public, max-age=#{2.days.to_i}" }
-  else
-    config.action_controller.perform_caching = false
-  end
+  # เปิด fragment cache ใน development ตลอด ไว้ทดสอบ Russian doll ของหน้า /posts (ไม่ต้องรัน bin/rails dev:cache)
+  # log จะเห็น "Read fragment views/..." ทุกกล่องที่อ่าน และ "Write fragment" เฉพาะกล่องที่ miss
+  # หมายเหตุ: key รวม digest ของ template แล้ว แก้ .erb ได้ key ใหม่เอง แต่แก้ helper/คำแปลใน th.yml จะยังเห็นของเก่า
+  #   ล้างทั้งก้อนตอน dev: bin/rails runner "Rails.cache.clear"
+  config.action_controller.perform_caching = true
+  config.action_controller.enable_fragment_cache_logging = true
 
-  # Change to :null_store to avoid any caching.
-  config.cache_store = :memory_store
+  # Solid Cache เหมือน production: เก็บใน DB cache แยก (config/database.yml, config/cache.yml) ไม่ต้องใช้ Redis
+  # ต่างจาก :memory_store ตรงที่ restart server แล้ว cache ยังอยู่ และทุก process เห็นก้อนเดียวกัน
+  config.cache_store = :solid_cache_store
 
   # เก็บไฟล์ที่อัปโหลดใน MinIO (docker compose up -d) ดู config/storage.yml
   config.active_storage.service = :minio

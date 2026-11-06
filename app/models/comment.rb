@@ -2,7 +2,11 @@ class Comment < ApplicationRecord
   AUTHOR_NAME_MAX_LENGTH = 50
   BODY_MAX_LENGTH = 1_000
 
-  belongs_to :post
+  # touch: เพิ่ม/แก้/ลบ comment = updated_at ของโพสต์เปลี่ยน -> cache key ของการ์ดโพสต์ใบนั้น (และรายการที่ครอบอยู่) เปลี่ยนเอง
+  #        ไม่ต้องลบ cache เอง  การ์ดใบอื่นใน cache ยังใช้ได้ (Russian doll)
+  # counter_cache: เก็บจำนวน comment ไว้ที่ posts.comments_count นับให้ตอน create/destroy
+  #        หน้ารายการโชว์จำนวนได้โดยไม่ COUNT ทีละโพสต์ (N+1)
+  belongs_to :post, touch: true, counter_cache: true
 
   # textarea ส่งขึ้นบรรทัดใหม่มาเป็น \r\n ทำให้ Ruby นับยาวกว่าที่ตัวนับในเบราว์เซอร์นับ
   normalizes :author_name, with: ->(name) { name.squish }

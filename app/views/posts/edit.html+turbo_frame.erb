@@ -1,5 +1,5 @@
 <%# ฟอร์มแก้หัวข้อแบบ inline: ใช้เมื่อคำขอมาจาก turbo-frame ในหน้า show (ดู PostsController#set_turbo_frame_variant)
-    id ของ frame ต้องตรงกับ posts/_post.html.erb  เปิด /posts/:id/edit ตรง ๆ จะได้ edit.html.erb หน้าเต็ม %>
+    id ของ frame ต้องตรงกับ posts/show.html.erb  เปิด /posts/:id/edit ตรง ๆ จะได้ edit.html.erb หน้าเต็ม %>
 <%= turbo_frame_tag @post, :title, class: "block" do %>
   <%= form_with model: @post, class: "flex flex-col gap-2" do |form| %>
     <%= form.label :title, t(".title_label"), class: "sr-only" %>

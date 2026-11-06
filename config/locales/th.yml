@@ -1,4 +1,8 @@
 th:
+  # รวมกับรูปแบบวันที่ของ gem rails-i18n  card = วันที่บนการ์ดโพสต์ เช่น "6 พ.ย. 2026"
+  date:
+    formats:
+      card: "%-d %b %Y"
   activerecord:
     models:
       category: หมวดหมู่
@@ -69,18 +73,24 @@ th:
       success: ลบหมวดหมู่เรียบร้อยแล้ว
       failure: ลบหมวดหมู่ไม่ได้ เพราะยังมีบทความอยู่ในหมวดหมู่นี้
   posts:
+    # ใช้ทั้งการ์ด (posts/_post) และหน้า show
+    reading_time: "อ่าน %{count} นาที"
     index:
+      eyebrow: Wongnok Blog
       title: บทความ
+      tagline: เรื่องเล่า ความรู้ และไอเดียใหม่ ๆ ที่อยากชวนคุณอ่าน อัปเดตสม่ำเสมอ
       new_post: เขียนบทความใหม่
-      empty: ยังไม่มีบทความ
-      empty_pending: ไม่มีฉบับร่างหรือบทความที่ตั้งเวลาไว้
       tab_published: เผยแพร่แล้ว
       tab_pending: ฉบับร่าง / ตั้งเวลาไว้
+    empty:
+      published: ยังไม่มีบทความ
+      pending: ไม่มีฉบับร่างหรือบทความที่ตั้งเวลาไว้
     show:
       breadcrumb: เส้นทางนำทาง
       breadcrumb_root: บทความทั้งหมด
       back: กลับไปหน้ารายการ
-      edit: แก้ไข
+      edit: แก้ไขบทความ
+      edit_title: แก้ไขหัวข้อ
       destroy: ลบบทความ
       confirm_destroy: ยืนยันที่จะลบบทความนี้?
       no_comments: ยังไม่มีความคิดเห็น มาเป็นคนแรกกันเลย
@@ -88,14 +98,16 @@ th:
       scheduled_notice: "ตั้งเวลาเผยแพร่ไว้ %{time}"
       publish_now: เผยแพร่ทันที
       confirm_publish_now: เผยแพร่และส่งอีเมลแจ้งผู้ติดตามตอนนี้เลยไหม?
+      posted_ago: "%{time}ที่แล้ว"
+      scheduled_for: "จะเผยแพร่ %{time}"
     edit:
       title_label: หัวข้อบทความ
       save: บันทึก
       cancel: ยกเลิก
     post:
-      posted_ago: "%{time}ที่แล้ว"
       scheduled_for: "จะเผยแพร่ %{time}"
-      edit_title: แก้ไขหัวข้อ
+      comments: "%{count} ความคิดเห็น"
+      read_more: อ่านต่อ
     form:
       cover_hint: "ไฟล์ PNG, JPEG หรือ WebP ขนาดไม่เกิน %{size}"
       category_prompt: เลือกหมวดหมู่

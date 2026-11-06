@@ -27,12 +27,16 @@ default: &default
   # https://guides.rubyonrails.org/configuring.html#database-pooling
   max_connections: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
 
-# แยก DB ของ Solid Queue / Solid Cable เหมือน production: bin/rails db:prepare สร้างให้และโหลด
-# db/queue_schema.rb, db/cable_schema.rb  ดูตารางคิวได้ด้วย bin/rails dbconsole --database queue
+# แยก DB ของ Solid Cache / Solid Queue / Solid Cable เหมือน production: bin/rails db:prepare สร้างให้และโหลด
+# db/cache_schema.rb, db/queue_schema.rb, db/cable_schema.rb  ดูตารางคิวได้ด้วย bin/rails dbconsole --database queue
 development:
   primary:
     <<: *default
     database: wongnok_blog_all_in_one_development
+  cache:
+    <<: *default
+    database: wongnok_blog_all_in_one_development_cache
+    migrations_paths: db/cache_migrate
   queue:
     <<: *default
     database: wongnok_blog_all_in_one_development_queue
