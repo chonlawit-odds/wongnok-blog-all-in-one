@@ -42,16 +42,20 @@ th:
             scheduled_at:
               in_the_past: ต้องไม่ย้อนหลังไปก่อนเวลาปัจจุบัน
   categories:
+    # ใช้ทั้งการ์ด (categories/_category) และหน้า show
+    posts_count: "%{count} บทความ"
     index:
+      eyebrow: Wongnok Blog
       title: หมวดหมู่
+      tagline: เลือกอ่านตามเรื่องที่สนใจ ทุกบทความถูกจัดไว้ในหมวดหมู่ให้หาง่าย
       new_category: เพิ่มหมวดหมู่
-      show: ดู
-      edit: แก้ไข
-      destroy: ลบ
-      confirm_destroy: ยืนยันที่จะลบหมวดหมู่นี้?
-      empty: ยังไม่มีหมวดหมู่
+    empty:
+      message: ยังไม่มีหมวดหมู่
     show:
-      title: รายละเอียดหมวดหมู่
+      breadcrumb: เส้นทางนำทาง
+      breadcrumb_root: หมวดหมู่ทั้งหมด
+      eyebrow: หมวดหมู่
+      posts: บทความในหมวดนี้
       edit: แก้ไขหมวดหมู่
       back: กลับไปหน้ารายการ
       destroy: ลบหมวดหมู่

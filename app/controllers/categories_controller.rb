@@ -2,12 +2,16 @@ class CategoriesController < ApplicationController
   before_action :set_category, only: %i[ show edit update destroy ]
 
   # GET /categories or /categories.json
+  # จำนวนบทความต่อหมวด: GROUP BY ครั้งเดียวเฉพาะหมวดในหน้านี้ ({ category_id => count })
+  # ไม่ให้การ์ดเรียก category.posts.count เอง (COUNT ทีละหมวด = N+1)
   def index
-    @categories = Category.all
+    @pagy, @categories = pagy(Category.alphabetical, limit: 12)
+    @post_counts = Post.where(category_id: @categories.map(&:id)).group(:category_id).count
   end
 
   # GET /categories/1 or /categories/1.json
   def show
+    @posts_count = @category.posts.count
   end
 
   # GET /categories/new

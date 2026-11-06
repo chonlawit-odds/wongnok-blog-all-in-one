@@ -103,7 +103,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_06_115652) do
     t.index ["scheduled_at"], name: "index_posts_on_scheduled_at", where: "((status)::text = 'scheduled'::text)"
     t.check_constraint "status::text <> 'published'::text OR published_at IS NOT NULL", name: "posts_published_requires_published_at"
     t.check_constraint "status::text <> 'scheduled'::text OR scheduled_at IS NOT NULL", name: "posts_scheduled_requires_scheduled_at"
-    t.check_constraint "status::text = ANY (ARRAY['draft'::character varying::text, 'scheduled'::character varying::text, 'published'::character varying::text])", name: "posts_status_valid"
+    t.check_constraint "status::text = ANY (ARRAY['draft'::character varying, 'scheduled'::character varying, 'published'::character varying]::text[])", name: "posts_status_valid"
   end
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
