@@ -12,3 +12,21 @@ two:
   author_name: สมหญิง
   body: ขอบคุณที่แบ่งปันค่ะ
   created_at: <%= 1.hour.ago %>
+
+# --- แถวด้านล่าง: ตั้งชื่อตามสถานการณ์ (ห้ามแก้แถว one / two ข้างบน ให้เพิ่มแถวใหม่แทน) ---
+# อยู่ที่ post_published_last_week (comments_count: 2 ต้องตรงกับจำนวนแถวที่นี่)
+
+# malee เขียนในโพสต์ของ somchai: เจ้าของโพสต์ก็ลบ comment นี้ไม่ได้ (ลบได้แค่ malee กับ admin)
+comment_by_malee_on_somchai_post:
+  post: post_published_last_week
+  user: malee
+  author_name: Malee Sooksai
+  body: น่าลองทำตามมากค่ะ
+  created_at: <%= 6.days.ago %>
+
+# ระหว่าง deploy รอบ expand ก่อน backfill เสร็จ: ยังไม่มี user ต้องอ่านชื่อจาก author_name
+comment_before_backfill:
+  post: post_published_last_week
+  author_name: ผู้อ่านเก่า
+  body: มาจากระบบเดิมก่อนมี login
+  created_at: <%= 5.days.ago %>

@@ -35,11 +35,36 @@ class Posts::PublicationsControllerTest < ActionDispatch::IntegrationTest
     sign_in_as users(:malee)
 
     assert_no_enqueued_jobs only: PublishPostJob do
-      post post_publication_url(@draft)
+      assert_no_changes -> { @draft.reload.attributes } do
+        post post_publication_url(@draft)
+      end
     end
 
     assert_response :not_found
-    assert @draft.reload.draft?
+  end
+
+  test "guest is sent to login, nothing is queued and the post is unchanged" do
+    reset! # ทิ้ง session ที่ login ไว้ใน setup
+
+    assert_no_enqueued_jobs only: PublishPostJob do
+      assert_no_changes -> { @draft.reload.attributes } do
+        post post_publication_url(@draft)
+      end
+    end
+
+    assert_redirected_to new_session_url
+  end
+
+  test "admin can publish another author's draft, through the queue" do
+    draft = posts(:post_draft)
+    sign_in_as users(:boss)
+
+    assert_enqueued_with(job: PublishPostJob, args: [ draft.id ]) do
+      post post_publication_url(draft)
+    end
+
+    assert draft.reload.scheduled?, "request แค่ตั้งเวลาเป็นตอนนี้ แล้วให้ job เผยแพร่"
+    assert_no_enqueued_emails
   end
 
   test "an already published post is not queued again" do

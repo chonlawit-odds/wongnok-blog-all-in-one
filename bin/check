@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+# ตรวจทั้งหมดก่อนบอกว่า "เสร็จ": style, security, autoload, test
+# set -e: คำสั่งไหน fail หยุดทันทีที่ตัวนั้น ไม่รันต่อ (exit code ไม่ใช่ 0)
+# system test แยกรัน: bin/rails test:system (ต้องมี Chrome)
+set -euo pipefail
+
+cd "$(dirname "$0")/.."
+
+step() {
+  echo
+  echo "== $1"
+}
+
+step "rubocop"
+bin/rubocop
+
+step "brakeman"
+bin/brakeman --quiet --no-pager --exit-on-warn --exit-on-error
+
+step "zeitwerk:check"
+bin/rails zeitwerk:check
+
+step "test"
+bin/rails test
+
+echo
+echo "bin/check: ผ่านทั้งหมด"

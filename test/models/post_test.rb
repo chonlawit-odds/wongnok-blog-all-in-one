@@ -139,6 +139,47 @@ class PostTest < ActiveSupport::TestCase
     end
   end
 
+  # --- validation ของ scheduled_at กับ fixture แต่ละสถานการณ์ ---
+
+  test "a draft does not need scheduled_at" do
+    assert posts(:post_draft).valid?
+    assert_nil posts(:post_draft).scheduled_at
+  end
+
+  test "moving a scheduled post into the past is rejected and the DB keeps the old time" do
+    post = posts(:post_scheduled_tomorrow)
+    original = post.scheduled_at
+
+    assert_not post.update(scheduled_at: 1.hour.ago)
+    assert post.errors.added?(:scheduled_at, :in_the_past)
+    assert_equal original, post.reload.scheduled_at
+  end
+
+  test "editing an overdue post without touching its time is still allowed" do
+    # เวลาเลยมาแล้วเพราะตัวกวาดยังไม่มา ไม่ใช่ความผิดผู้เขียน: แก้หัวข้อต้องไม่ติด "เวลาย้อนหลัง"
+    post = posts(:post_scheduled_overdue)
+
+    assert post.update(title: "แก้หัวข้อระหว่างรอเผยแพร่"), post.errors.full_messages.to_sentence
+  end
+
+  test "switching a draft to scheduled checks the time even when scheduled_at did not change" do
+    post = posts(:post_draft)
+    post.update_columns(scheduled_at: 1.day.ago) # เคยตั้งเวลาไว้แล้วถอยกลับเป็นร่าง เวลาเก่ายังค้าง
+
+    assert_not post.update(status: :scheduled)
+    assert post.errors.added?(:scheduled_at, :in_the_past)
+    assert post.reload.draft?
+  end
+
+  test "publish_if_due! on the fixtures: overdue gets published, tomorrow stays scheduled" do
+    assert posts(:post_scheduled_overdue).publish_if_due!
+    assert posts(:post_scheduled_overdue).reload.published?
+
+    assert_not posts(:post_scheduled_tomorrow).publish_if_due!
+    assert posts(:post_scheduled_tomorrow).reload.scheduled?
+    assert_nil posts(:post_scheduled_tomorrow).published_at
+  end
+
   test "check constraint rejects scheduled without scheduled_at at the DB level" do
     assert_raises(ActiveRecord::StatementInvalid) do
       posts(:one).update_columns(status: "scheduled", scheduled_at: nil)

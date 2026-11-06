@@ -22,3 +22,55 @@ two:
   user: malee
   status: published
   published_at: <%= 2.days.ago %>
+
+# --- แถวด้านล่าง: ตั้งชื่อตามสถานการณ์ ครบทุกสถานะ (ห้ามแก้แถว one / two ข้างบน ให้เพิ่มแถวใหม่แทน) ---
+# published_at ของแถวใหม่เก่ากว่า one เสมอ: one ยังเป็นโพสต์ล่าสุดในหน้ารายการ
+
+# ฉบับร่างของ somchai: ผู้อ่านยังไม่เห็น ยังไม่มีเวลาเผยแพร่
+post_draft:
+  title: ฉบับร่างของสมชาย
+  description: เนื้อหาฉบับร่าง
+  plain_text: เนื้อหาฉบับร่าง
+  category: one
+  user: somchai
+  status: draft
+
+# ตั้งเวลาไว้พรุ่งนี้: ตัวกวาดต้องยังไม่แตะ
+post_scheduled_tomorrow:
+  title: ตั้งเวลาไว้พรุ่งนี้
+  description: เนื้อหาที่ตั้งเวลาไว้
+  plain_text: เนื้อหาที่ตั้งเวลาไว้
+  category: one
+  user: somchai
+  status: scheduled
+  scheduled_at: <%= 1.day.from_now %>
+
+# ถึงเวลาแล้วแต่ตัวกวาดยังไม่มาหยิบ (worker ปิดอยู่/รอรอบถัดไป): รอบถัดไปต้องเผยแพร่
+post_scheduled_overdue:
+  title: เลยเวลาเผยแพร่แล้ว
+  description: เนื้อหาที่ถึงเวลาแล้ว
+  plain_text: เนื้อหาที่ถึงเวลาแล้ว
+  category: two
+  user: somchai
+  status: scheduled
+  scheduled_at: <%= 10.minutes.ago %>
+
+# เผยแพร่ไปแล้วสัปดาห์ก่อน มี comment ของคนอื่น (malee) และ comment ที่ยังไม่ได้ backfill
+post_published_last_week:
+  title: เผยแพร่เมื่อสัปดาห์ก่อน
+  description: เนื้อหาที่เผยแพร่แล้ว
+  plain_text: เนื้อหาที่เผยแพร่แล้ว
+  category: two
+  user: somchai
+  status: published
+  published_at: <%= 1.week.ago %>
+  comments_count: 2
+
+# โพสต์เดิมก่อนมีระบบ login: ไม่มีเจ้าของ (user_id NULL) แก้/ลบ/เผยแพร่ได้เฉพาะ admin
+post_published_before_login:
+  title: โพสต์เก่าก่อนมีระบบสมาชิก
+  description: เนื้อหาเก่า
+  plain_text: เนื้อหาเก่า
+  category: one
+  status: published
+  published_at: <%= 1.month.ago %>

@@ -42,6 +42,33 @@ class PublishPostJobTest < ActiveJob::TestCase
     end
   end
 
+  test "perform_now 3 times sends exactly one email" do
+    post = posts(:post_scheduled_overdue)
+    Follower.where.not(id: followers(:ann).id).delete_all # สถานการณ์: มีผู้ติดตามคนเดียว
+
+    # assert_emails แบบ block ส่งอีเมลที่เข้าคิว (deliver_later) ระหว่าง block จริง แล้วนับที่ส่งออกไป
+    assert_emails 1 do
+      3.times { PublishPostJob.perform_now(post.id) }
+    end
+
+    assert post.reload.published?
+    mail = ActionMailer::Base.deliveries.last
+    assert_equal [ followers(:ann).email ], mail.to
+    assert_includes mail.subject, post.title
+  end
+
+  test "a post scheduled for tomorrow: 3 runs publish nothing and send nothing" do
+    post = posts(:post_scheduled_tomorrow)
+
+    assert_no_emails do
+      3.times { PublishPostJob.perform_now(post.id) }
+    end
+
+    assert post.reload.scheduled?
+    assert_nil post.published_at
+    assert_empty post.post_notifications
+  end
+
   test "does not publish before the scheduled time" do
     assert_no_enqueued_emails { PublishPostJob.perform_now(@post.id) }
     assert @post.reload.scheduled?

@@ -9,3 +9,28 @@ post_two_body:
   record: two (Post)
   name: body
   body: <div>MyText</div>
+
+post_draft_body:
+  record: post_draft (Post)
+  name: body
+  body: <div>เนื้อหาฉบับร่าง</div>
+
+post_scheduled_tomorrow_body:
+  record: post_scheduled_tomorrow (Post)
+  name: body
+  body: <div>เนื้อหาที่ตั้งเวลาไว้</div>
+
+post_scheduled_overdue_body:
+  record: post_scheduled_overdue (Post)
+  name: body
+  body: <div>เนื้อหาที่ถึงเวลาแล้ว</div>
+
+post_published_last_week_body:
+  record: post_published_last_week (Post)
+  name: body
+  body: <div>เนื้อหาที่เผยแพร่แล้ว</div>
+
+post_published_before_login_body:
+  record: post_published_before_login (Post)
+  name: body
+  body: <div>เนื้อหาเก่า</div>

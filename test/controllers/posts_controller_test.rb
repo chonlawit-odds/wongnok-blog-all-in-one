@@ -19,14 +19,14 @@ class PostsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "index paginates 10 posts per page" do
-    create_posts(11) # รวม fixture 2 = 13 โพสต์
+    create_posts(11) # รวมกับโพสต์ที่เผยแพร่แล้วใน fixture เกิน 10 แน่นอน
 
     get posts_url
     assert_select "#posts article", 10
     assert_select "a[rel=next][href=?]", posts_path(page: 2)
 
     get posts_url(page: 2)
-    assert_select "#posts article", 3
+    assert_select "#posts article", Post.published.count - 10
     assert_select "a[rel=prev][href=?]", posts_path(page: 1)
   end
 
@@ -62,7 +62,9 @@ class PostsControllerTest < ActionDispatch::IntegrationTest
     scheduled = create_post(title: "ตั้งเวลาไว้", status: :scheduled, scheduled_at: 1.hour.from_now)
 
     get posts_url(view: "pending")
-    assert_select "#posts article", 2
+    # ที่สร้างใน test 2 + ใน fixture 3 (post_draft, post_scheduled_tomorrow, post_scheduled_overdue)
+    assert_select "#posts article", 5
+    assert_select "##{dom_id(posts(:post_scheduled_overdue))} .badge", text: "ตั้งเวลาไว้"
     assert_select "##{dom_id(draft)} .badge", text: "ฉบับร่าง"
     assert_select "##{dom_id(scheduled)} .badge", text: "ตั้งเวลาไว้"
     assert_select "##{dom_id(posts(:one))}", false
@@ -338,12 +340,72 @@ class PostsControllerTest < ActionDispatch::IntegrationTest
     get edit_post_url(@post)
     assert_response :not_found
 
-    patch post_url(@post), params: { post: { title: "มาลีแก้ของสมชาย" } }
+    assert_no_changes -> { stored(@post) } do
+      patch post_url(@post), params: { post: { title: "มาลีแก้ของสมชาย" } }
+    end
     assert_response :not_found
-    assert_equal "MyString", @post.reload.title
 
-    assert_no_difference("Post.count") { delete post_url(@post) }
+    assert_no_changes -> { stored(@post) } do
+      delete post_url(@post)
+    end
     assert_response :not_found
+  end
+
+  test "another author cannot change any field of a scheduled post: 404 and the row is exactly as before" do
+    post = posts(:post_scheduled_tomorrow)
+    sign_in_as users(:malee)
+
+    assert_no_changes -> { stored(post) } do
+      patch post_url(post), params: { post: { title: "มาลีแก้", body: "<div>เนื้อหาของมาลี</div>", category_id: categories(:two).id,
+                                              status: "draft", scheduled_at: 3.days.from_now.strftime("%Y-%m-%dT%H:%M") } }
+    end
+    assert_response :not_found
+  end
+
+  test "the owner can change every field of their scheduled post" do
+    post = posts(:post_scheduled_tomorrow)
+    new_time = 3.days.from_now.change(sec: 0)
+    sign_in_as users(:somchai)
+
+    patch post_url(post), params: { post: { title: "เลื่อนเวลา", body: "<div>เนื้อหาใหม่</div>", category_id: categories(:two).id,
+                                            scheduled_at: new_time.strftime("%Y-%m-%dT%H:%M") } }
+
+    assert_redirected_to post_url(post)
+    post.reload
+    assert_equal [ "เลื่อนเวลา", "เนื้อหาใหม่", categories(:two), new_time ], [ post.title, post.plain_text, post.category, post.scheduled_at ]
+    assert post.scheduled?
+    assert_equal users(:somchai), post.user
+  end
+
+  test "another author cannot delete someone else's post: 404, the post and its comments are still there" do
+    post = posts(:post_published_last_week)
+    sign_in_as users(:malee)
+
+    assert_no_difference [ "Post.count", "Comment.count" ] do
+      assert_no_changes -> { stored(post) } do
+        delete post_url(post)
+      end
+    end
+    assert_response :not_found
+  end
+
+  test "an author gets 404 updating a post that has no owner, and it stays the same" do
+    post = posts(:post_published_before_login)
+    sign_in_as users(:somchai)
+
+    assert_no_changes -> { stored(post) } do
+      patch post_url(post), params: { post: { title: "ขอเป็นเจ้าของ" } }
+    end
+    assert_response :not_found
+  end
+
+  test "admin can delete a post that has no owner" do
+    sign_in_as users(:boss)
+
+    assert_difference("Post.count", -1) do
+      delete post_url(posts(:post_published_before_login))
+    end
+    assert_redirected_to posts_url
   end
 
   test "admin can edit and update another author's post" do
@@ -392,6 +454,12 @@ class PostsControllerTest < ActionDispatch::IntegrationTest
   end
 
   private
+    # ทั้งแถวในตาราง posts + เนื้อหา rich text (เก็บคนละตาราง) ไว้เทียบก่อน/หลัง  ถูกลบ = nil
+    def stored(post)
+      record = Post.find_by(id: post.id)
+      record && [ record.attributes, record.body.to_s ]
+    end
+
     def create_post(user: users(:somchai), **attributes)
       Post.create!(title: "โพสต์ทดสอบ", body: "<div>เนื้อหาทดสอบ</div>", category: categories(:one), user:, **attributes)
     end

@@ -1,7 +1,10 @@
 require "test_helper"
+require "turbo/broadcastable/test_helper"
 
 class CommentsControllerTest < ActionDispatch::IntegrationTest
   include ActionView::RecordIdentifier
+  # turbo-rails ใส่ให้ก็ต่อเมื่อ Action Cable โหลดแล้ว รันไฟล์นี้เดี่ยว ๆ จะไม่มี จึง include เอง
+  include Turbo::Broadcastable::TestHelper
 
   setup do
     @post = posts(:one)
@@ -113,6 +116,54 @@ class CommentsControllerTest < ActionDispatch::IntegrationTest
     delete post_comment_url(posts(:two), comments(:one))
 
     assert_response :not_found
+  end
+
+  test "create queues the live broadcasts as jobs instead of sending them during the request" do
+    sign_in_as users(:malee)
+
+    # append comment + อัปเดตตัวนับ: 2 job  ยังไม่มีอะไรส่งออกไปทาง Action Cable ระหว่าง request
+    assert_enqueued_jobs 2, only: Turbo::Streams::ActionBroadcastJob do
+      assert_no_turbo_stream_broadcasts @post do
+        post post_comments_url(@post), params: { comment: { body: "สวัสดี" } }, as: :turbo_stream
+      end
+    end
+  end
+
+  test "the post's owner gets 404 deleting someone else's comment on their post, and nothing changes" do
+    comment = comments(:comment_by_malee_on_somchai_post)
+    sign_in_as users(:somchai)
+
+    assert_no_changes -> { [ Comment.find_by(id: comment.id)&.attributes, comment.post.reload.comments_count ] } do
+      delete post_comment_url(comment.post, comment), as: :turbo_stream
+    end
+    assert_response :not_found
+  end
+
+  test "the comment's owner deletes it from someone else's post" do
+    comment = comments(:comment_by_malee_on_somchai_post)
+    sign_in_as users(:malee)
+
+    assert_difference -> { comment.post.reload.comments_count }, -1 do
+      delete post_comment_url(comment.post, comment)
+    end
+    assert_not Comment.exists?(comment.id)
+  end
+
+  test "guest deleting a comment is sent to login and the comment stays" do
+    assert_no_changes -> { Comment.find_by(id: comments(:one).id)&.attributes } do
+      delete post_comment_url(@post, comments(:one))
+    end
+
+    assert_redirected_to new_session_url
+  end
+
+  test "a comment from before the backfill still shows its old author_name" do
+    post = posts(:post_published_last_week)
+
+    get post_url(post)
+
+    assert_select "##{dom_id(comments(:comment_before_backfill))}", text: /ผู้อ่านเก่า/
+    assert_select "##{dom_id(comments(:comment_by_malee_on_somchai_post))}", text: /Malee Sooksai/
   end
 
   test "post page shows the delete button only on comments the viewer may delete" do

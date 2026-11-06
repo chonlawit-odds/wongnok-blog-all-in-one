@@ -10,8 +10,10 @@ class PublishDuePostsJobTest < ActiveJob::TestCase
       PublishDuePostsJob.perform_now
     end
 
-    assert_enqueued_jobs 1, only: PublishPostJob
+    # ถึงเวลา = due กับ post_scheduled_overdue (fixture)  post_scheduled_tomorrow / ฉบับร่าง / ที่เผยแพร่แล้ว ไม่เข้าคิว
+    assert_enqueued_jobs 2, only: PublishPostJob
     assert_enqueued_with job: PublishPostJob, args: [ due.id ]
+    assert_enqueued_with job: PublishPostJob, args: [ posts(:post_scheduled_overdue).id ]
   end
 
   test "runs every minute in development and production" do
