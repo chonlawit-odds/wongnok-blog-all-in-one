@@ -1,8 +1,12 @@
 require "test_helper"
+require "turbo/broadcastable/test_helper"
 
 class CommentTest < ActiveSupport::TestCase
   include ActionView::RecordIdentifier
   include ActiveJob::TestHelper
+  # turbo-rails ใส่ helper นี้ให้ก็ต่อเมื่อ Action Cable โหลดแล้ว (on_load(:action_cable))
+  # รัน test นี้เดี่ยว ๆ หรือเป็นตัวแรกของ worker จะไม่มี capture_turbo_stream_broadcasts จึง include เอง
+  include Turbo::Broadcastable::TestHelper
 
   setup do
     @post = posts(:one)
@@ -47,6 +51,27 @@ class CommentTest < ActiveSupport::TestCase
     actions = streams.to_h { |stream| [ stream["action"], stream["target"] ] }
     assert_equal dom_id(@post, :comments), actions["append"]
     assert_equal dom_id(@post, :comments_count), actions["update"]
+  end
+
+  test "counter cache follows create and destroy" do
+    comment = nil
+    assert_difference -> { @post.reload.comments_count }, 1 do
+      comment = @post.comments.create!(author_name: "ทดสอบ", body: "สวัสดี")
+    end
+
+    assert_difference -> { @post.reload.comments_count }, -1 do
+      comment.destroy!
+    end
+  end
+
+  test "creating or editing a comment touches the post (new cache key for its card)" do
+    assert_changes -> { @post.reload.cache_version } do
+      @post.comments.create!(author_name: "ทดสอบ", body: "สวัสดี")
+    end
+
+    assert_changes -> { @post.reload.cache_version } do
+      comments(:one).update!(body: "แก้ความคิดเห็น")
+    end
   end
 
   test "deleting a post deletes its comments" do

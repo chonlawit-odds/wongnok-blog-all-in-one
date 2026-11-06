@@ -4,6 +4,41 @@
 @source not "./daisyui{,*}.mjs";
 @plugin "./daisyui.mjs";
 
+/* ปรับธีม light/dark ของ daisyUI (ชื่อเดิม ค่าที่ไม่ได้ระบุใช้ของเดิม) ให้เป็นโทนอบอุ่นแบบนิตยสาร
+   ชื่อยังเป็น light/dark: theme_controller.js และ data-theme บน <html> ใช้ได้เหมือนเดิม
+   contrast (WCAG): primary-content บน primary >= 5:1, base-content/60 บน base-100 >= 4.5:1 ทั้งสองธีม */
+@plugin "./daisyui-theme.mjs" {
+  name: "light";
+  default: true;
+  color-scheme: light;
+  --color-base-100: oklch(99.4% 0.004 80);
+  --color-base-200: oklch(97% 0.007 80);
+  --color-base-300: oklch(92% 0.012 75);
+  --color-base-content: oklch(20% 0.016 55);
+  --color-primary: oklch(54% 0.165 38);
+  --color-primary-content: oklch(98.5% 0.01 60);
+  --color-secondary: oklch(54% 0.085 195);
+  --color-secondary-content: oklch(98.5% 0.01 195);
+  --radius-box: 1rem;
+  --radius-field: 0.5rem;
+}
+
+@plugin "./daisyui-theme.mjs" {
+  name: "dark";
+  prefersdark: true;
+  color-scheme: dark;
+  --color-base-100: oklch(23% 0.012 55);
+  --color-base-200: oklch(19.5% 0.01 55);
+  --color-base-300: oklch(31% 0.014 55);
+  --color-base-content: oklch(92% 0.012 75);
+  --color-primary: oklch(72% 0.145 45);
+  --color-primary-content: oklch(22% 0.045 40);
+  --color-secondary: oklch(74% 0.085 190);
+  --color-secondary-content: oklch(22% 0.03 190);
+  --radius-box: 1rem;
+  --radius-field: 0.5rem;
+}
+
 @theme {
   --font-sans: "Noto Sans Thai", ui-sans-serif, system-ui, sans-serif;
 }

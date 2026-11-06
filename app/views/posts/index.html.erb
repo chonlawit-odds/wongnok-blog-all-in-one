@@ -1,29 +1,53 @@
 <% content_for :title, t(".title") %>
 
-<div class="w-full max-w-3xl mx-auto">
+<div class="w-full max-w-4xl mx-auto">
   <% if notice.present? %>
-    <div role="status" id="notice" class="alert alert-success mb-6"><%= notice %></div>
+    <div role="status" id="notice" class="alert alert-success alert-soft mb-6"><%= notice %></div>
   <% end %>
 
-  <div class="flex flex-wrap items-center justify-between gap-4 mb-8">
-    <h1 class="text-3xl sm:text-4xl font-bold"><%= t(".title") %></h1>
-    <%= link_to t(".new_post"), new_post_path, class: "btn btn-primary" %>
-  </div>
+  <section class="relative overflow-hidden rounded-box border border-base-300 bg-base-100 text-base-content shadow-sm px-6 py-10 sm:px-10 sm:py-14 mb-8">
+    <%# วงกลมฟุ้ง ๆ ด้านหลัง ตกแต่งอย่างเดียว %>
+    <div aria-hidden="true" class="pointer-events-none absolute -top-24 -right-16 size-72 rounded-full bg-primary/15 blur-3xl"></div>
+    <div aria-hidden="true" class="pointer-events-none absolute -bottom-32 -left-12 size-72 rounded-full bg-secondary/15 blur-3xl"></div>
 
-  <div role="tablist" class="tabs tabs-box mb-6">
+    <div class="relative flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+      <div class="max-w-xl">
+        <p class="text-sm font-semibold tracking-wide text-primary"><%= t(".eyebrow") %></p>
+        <h1 class="mt-2 text-4xl sm:text-5xl font-bold tracking-tight"><%= t(".title") %></h1>
+        <p class="mt-3 text-base-content/70 leading-relaxed"><%= t(".tagline") %></p>
+      </div>
+      <%= link_to new_post_path, class: "btn btn-primary shrink-0 self-start sm:self-auto" do %>
+        <svg xmlns="http://www.w3.org/2000/svg" class="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14m-7-7h14" />
+        </svg>
+        <%= t(".new_post") %>
+      <% end %>
+    </div>
+  </section>
+
+  <div role="tablist" class="tabs tabs-box w-fit mb-6">
     <%= link_to t(".tab_published"), posts_path, role: "tab",
           class: class_names("tab", "tab-active": !@pending), aria: { selected: !@pending } %>
     <%= link_to t(".tab_pending"), posts_path(view: "pending"), role: "tab",
           class: class_names("tab", "tab-active": @pending), aria: { selected: @pending } %>
   </div>
 
-  <div id="posts" class="space-y-4">
-    <%= render(@posts) || tag.p(t(@pending ? ".empty_pending" : ".empty"), class: "text-center text-base-content/60 my-10") %>
-  </div>
+  <%# Russian doll: กล่องนอก = ทั้งหน้ารายการ  กล่องใน = การ์ดทีละใบ (posts/_post.html.erb)
+      key ของกล่องนอก = SQL ของรายการทั้งหมดก่อนแบ่งหน้า + เลขหน้า  version = จำนวนโพสต์ + updated_at ล่าสุด
+        hit: ข้ามทั้งกล่อง ไม่ query โพสต์/หมวดหมู่/รูปปกเลย (เหลือแค่ COUNT ของ pagy + COUNT/MAX ของ key)
+        มีโพสต์ไหนเปลี่ยน (รวม touch จาก comment) -> กล่องนอก miss แต่การ์ดที่ไม่เปลี่ยนยัง hit อยู่
+      ใช้ทั้งรายการ ไม่ใช่เฉพาะหน้านี้ (@posts): ลบโพสต์ในหน้านี้แล้วโพสต์จากหน้าถัดไปเลื่อนขึ้นมาแทน
+        จำนวนในหน้ายังเท่าเดิม updated_at ล่าสุดของหน้าก็อาจเท่าเดิม = key เดิม เห็นโพสต์ที่ลบไปแล้ว
+      ในกล่องไม่มีของเฉพาะผู้ใช้: notice, ฟอร์มติดตาม (CSRF token) และ pagination อยู่นอกกล่อง %>
+  <% cache [ @posts_scope, @pagy.page ] do %>
+    <div id="posts" class="grid gap-5">
+      <%= render(@posts) || render("posts/empty", pending: @pending) %>
+    </div>
+  <% end %>
 
   <%= render "shared/pagination", pagy: @pagy %>
 
-  <div class="mt-10">
+  <div class="mt-12">
     <%= render "followers/form", follower: @follower %>
   </div>
 </div>

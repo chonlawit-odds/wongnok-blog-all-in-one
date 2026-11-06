@@ -1,2 +1,3 @@
 <%# locals: (post:) -%>
-<%= t(".title", count: post.comments.count) %>
+<%# comments_count = counter_cache ของ Comment belongs_to :post อ่านจากคอลัมน์ ไม่ COUNT ใหม่ %>
+<%= t(".title", count: post.comments_count) %>

@@ -1,6 +1,7 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 # body อยู่ใน test/fixtures/action_text/rich_texts.yml  description ยังเก็บไว้ช่วง expand-contract
 # ทั้งสองโพสต์เผยแพร่แล้ว (โผล่ในหน้ารายการ)  ฉบับร่าง/ตั้งเวลา สร้างในแต่ละ test เอง
+# fixture insert ตรงเข้า DB ไม่ผ่าน counter_cache: comments_count ต้องตรงกับ comments.yml เอง
 
 one:
   title: MyString
@@ -9,6 +10,7 @@ one:
   category: one
   status: published
   published_at: <%= 1.day.ago %>
+  comments_count: 2
 
 two:
   title: MyString

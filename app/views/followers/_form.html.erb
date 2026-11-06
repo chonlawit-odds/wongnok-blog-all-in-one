@@ -1,26 +1,40 @@
 <%# locals: (follower:) -%>
-<%= form_with model: follower, class: "card bg-base-100 text-base-content border border-base-300" do |form| %>
-  <div class="card-body gap-3">
-    <h2 class="card-title text-lg"><%= t(".title") %></h2>
-    <p class="text-sm text-base-content/60"><%= t(".description") %></p>
+<%# มี CSRF token ของแต่ละ session ห้ามอยู่ในกล่อง cache (ดู posts/index.html.erb) %>
+<%= form_with model: follower, class: "@container card relative overflow-hidden bg-base-100 text-base-content border border-base-300 shadow-sm" do |form| %>
+  <div aria-hidden="true" class="pointer-events-none absolute inset-y-0 left-0 w-1.5 bg-primary"></div>
 
-    <% if follower.errors.any? %>
-      <div role="alert" class="alert alert-error alert-soft flex-col items-start">
-        <p class="font-medium"><%= t(".error_header", count: follower.errors.count) %></p>
-        <ul class="list-disc ml-6">
-          <% follower.errors.each do |error| %>
-            <li><%= error.full_message %></li>
-          <% end %>
-        </ul>
+  <div class="card-body gap-5 p-6 sm:p-8 @2xl:flex-row @2xl:items-center @2xl:gap-8">
+    <div class="flex items-start gap-4 @2xl:flex-1">
+      <div class="grid size-12 shrink-0 place-items-center rounded-full bg-primary/10 text-primary">
+        <svg xmlns="http://www.w3.org/2000/svg" class="size-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" />
+        </svg>
       </div>
-    <% end %>
+      <div>
+        <h2 class="card-title text-lg"><%= t(".title") %></h2>
+        <p class="mt-1 text-sm text-base-content/60"><%= t(".description") %></p>
+      </div>
+    </div>
 
-    <div class="join w-full">
-      <%= form.label :email, class: "sr-only" %>
-      <%= form.email_field :email, required: true, autocomplete: "email", maxlength: Follower::EMAIL_MAX_LENGTH,
-            placeholder: t(".email_placeholder"),
-            class: ["input join-item w-full", { "input-error": follower.errors[:email].any? }] %>
-      <%= form.submit t(".submit"), class: "btn btn-primary join-item" %>
+    <div class="flex flex-col gap-3 @2xl:w-96">
+      <% if follower.errors.any? %>
+        <div role="alert" class="alert alert-error alert-soft flex-col items-start">
+          <p class="font-medium"><%= t(".error_header", count: follower.errors.count) %></p>
+          <ul class="list-disc ml-6">
+            <% follower.errors.each do |error| %>
+              <li><%= error.full_message %></li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
+
+      <div class="join w-full">
+        <%= form.label :email, class: "sr-only" %>
+        <%= form.email_field :email, required: true, autocomplete: "email", maxlength: Follower::EMAIL_MAX_LENGTH,
+              placeholder: t(".email_placeholder"),
+              class: ["input join-item w-full", { "input-error": follower.errors[:email].any? }] %>
+        <%= form.submit t(".submit"), class: "btn btn-primary join-item" %>
+      </div>
     </div>
   </div>
 <% end %>

@@ -41,8 +41,10 @@ class PostsControllerTest < ActionDispatch::IntegrationTest
   test "index loads a page with at most 6 queries" do
     create_posts(11, with_cover: true)
 
-    # count + posts + categories + cover attachments + blobs — ไม่มี N+1 และไม่โหลด rich text (ข้อความย่อใช้ plain_text)
-    assert_queries_count(5) { get posts_url }
+    # count + COUNT/MAX ของ key กล่อง cache นอก + posts + categories + cover attachments + blobs
+    # ไม่มี N+1 จำนวน comment มาจาก comments_count และไม่โหลด rich text (ข้อความย่อใช้ plain_text)
+    # test ใช้ :null_store = cache miss ทุกครั้ง นี่จึงเป็นจำนวนตอน miss (ตอน hit ดู test/integration/posts_caching_test.rb)
+    assert_queries_count(6) { get posts_url }
   end
 
   test "index lists only published posts, newest published first" do
