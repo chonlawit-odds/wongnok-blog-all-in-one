@@ -54,13 +54,12 @@
 15. association ที่เป็น attachment หรือ rich text ต้องมี with_attached_*/with_rich_text_* ใน controller
     Bullet เตือน AVOID eager loading `"rich_text_*"` = false positive ห้ามลบ ให้ add_safelist ใน development.rb
 16. validate ไฟล์จากเนื้อไฟล์จริง ไม่เชื่อ content_type ที่ client ส่งมา และห้ามตั้ง bucket เป็น public — ใช้ signed URL เสมอ
-17. job ต้อง idempotent สมมติเสมอว่าจะถูกรันซ้ำ (retry, เข้าคิวซ้ำ, สอง worker หยิบพร้อมกัน)
-    - เปลี่ยนสถานะ: guard ด้วยสถานะใน with_lock ตัดสินจากค่าล่าสุดใน DB
-    - side effect ที่ทำซ้ำไม่ได้ (อีเมล, สร้างแถว): unique constraint ที่ DB + จองด้วย insert_all ON CONFLICT ก่อนทำ
-      ไม่ใช่ validates uniqueness หรือ exists? แล้วค่อยสร้าง
-    - ห้ามนับด้วย increment ให้นับจากจำนวนแถว
-18. ส่งเฉพาะ id เข้า job ห้ามส่งก้อนข้อมูล ไฟล์ หรือ URL ที่หมดอายุได้ — โหลดสดและสร้างลิงก์ตอน perform
-    job ของ Rails ที่ส่ง record ผ่าน GlobalID (broadcasts_to, broadcast_*_later_to, purge_later) ถือว่าผ่าน ห้ามแก้
+17. job ต้อง idempotent (retry, เข้าคิวซ้ำ, สอง worker พร้อมกัน): เปลี่ยนสถานะให้ตัดสินจากค่าล่าสุดใน with_lock
+    side effect ที่ทำซ้ำไม่ได้ จองด้วย unique index + insert_all ON CONFLICT ก่อนทำ (ไม่ใช่ exists?/validates uniqueness) และนับจากจำนวนแถว ไม่ใช้ increment
+18. ส่งแค่ id เข้า job แล้วโหลดสดตอน perform ห้ามส่งก้อนข้อมูล ไฟล์ หรือ URL ที่หมดอายุได้ (GlobalID ที่ Rails ส่งเอง เช่น broadcast_*_later_to, purge_later ถือว่าผ่าน)
+19. ห้ามลบ cache เอง (Rails.cache.delete, expire_fragment) และห้ามใช้ expires_in แทน — ข้อมูลในกล่องเปลี่ยน cache key ต้องเปลี่ยนตาม
+    ลูกในกล่องแม่ใช้ belongs_to touch: true, ข้อมูลแม่ในกล่องลูกให้แม่ touch_all ลูกตอนเปลี่ยน, เขียนด้วย update_all/insert_all ต้อง touch เอง
+20. ในกล่อง cache ห้ามมีของที่ต่างกันต่อผู้ใช้หรือต่อ request (current_user, form/button_to ที่มี CSRF token, flash, เวลาแบบ "x นาทีที่แล้ว") ให้ย้ายออกนอกกล่อง
 
 ## รูปแบบการตอบ
 
