@@ -54,6 +54,13 @@
 15. association ที่เป็น attachment หรือ rich text ต้องมี with_attached_*/with_rich_text_* ใน controller
     Bullet เตือน AVOID eager loading `"rich_text_*"` = false positive ห้ามลบ ให้ add_safelist ใน development.rb
 16. validate ไฟล์จากเนื้อไฟล์จริง ไม่เชื่อ content_type ที่ client ส่งมา และห้ามตั้ง bucket เป็น public — ใช้ signed URL เสมอ
+17. job ต้อง idempotent สมมติเสมอว่าจะถูกรันซ้ำ (retry, เข้าคิวซ้ำ, สอง worker หยิบพร้อมกัน)
+    - เปลี่ยนสถานะ: guard ด้วยสถานะใน with_lock ตัดสินจากค่าล่าสุดใน DB
+    - side effect ที่ทำซ้ำไม่ได้ (อีเมล, สร้างแถว): unique constraint ที่ DB + จองด้วย insert_all ON CONFLICT ก่อนทำ
+      ไม่ใช่ validates uniqueness หรือ exists? แล้วค่อยสร้าง
+    - ห้ามนับด้วย increment ให้นับจากจำนวนแถว
+18. ส่งเฉพาะ id เข้า job ห้ามส่งก้อนข้อมูล ไฟล์ หรือ URL ที่หมดอายุได้ — โหลดสดและสร้างลิงก์ตอน perform
+    job ของ Rails ที่ส่ง record ผ่าน GlobalID (broadcasts_to, broadcast_*_later_to, purge_later) ถือว่าผ่าน ห้ามแก้
 
 ## รูปแบบการตอบ
 
